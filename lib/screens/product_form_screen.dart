@@ -1,0 +1,323 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/product_provider.dart';
+import '../providers/supplier_provider.dart';
+import '../models/product.dart';
+import '../services/image_service.dart';
+
+class ProductFormScreen extends StatefulWidget {
+  final Product? product;
+
+  const ProductFormScreen({super.key, this.product});
+
+  @override
+  State<ProductFormScreen> createState() => _ProductFormScreenState();
+}
+
+class _ProductFormScreenState extends State<ProductFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _quantityController = TextEditingController();
+  final _refundedStockController = TextEditingController();
+  final _buyPriceController = TextEditingController();
+  final _sellPriceController = TextEditingController();
+  final _reorderLevelController = TextEditingController();
+  final _supplierController = TextEditingController();
+  String? _photoPath;
+  int? _selectedSupplierId;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.product != null) {
+      _nameController.text = widget.product!.name;
+      _quantityController.text = widget.product!.quantity.toString();
+      _refundedStockController.text = widget.product!.refundedStock.toString();
+      _buyPriceController.text = widget.product!.buyPrice.toString();
+      _sellPriceController.text = widget.product!.sellPrice.toString();
+      _reorderLevelController.text = widget.product!.reorderLevel.toString();
+      _photoPath = widget.product!.photoPath;
+      _selectedSupplierId = widget.product!.supplierId;
+      _supplierController.text = widget.product!.supplierId?.toString() ?? '';
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SupplierProvider>().loadSuppliers();
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _quantityController.dispose();
+    _refundedStockController.dispose();
+    _buyPriceController.dispose();
+    _sellPriceController.dispose();
+    _reorderLevelController.dispose();
+    _supplierController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final path = await ImageService.pickAndCompressImage();
+    if (path != null) {
+      setState(() {
+        _photoPath = path;
+      });
+    }
+  }
+
+  Future<void> _saveProduct() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final productProvider = context.read<ProductProvider>();
+    
+    final product = Product(
+      id: widget.product?.id,
+      name: _nameController.text.trim(),
+      quantity: int.parse(_quantityController.text),
+      refundedStock: _refundedStockController.text.trim().isEmpty
+          ? 0
+          : int.parse(_refundedStockController.text.trim()),
+      buyPrice: double.parse(_buyPriceController.text),
+      sellPrice: double.parse(_sellPriceController.text),
+      reorderLevel: int.parse(_reorderLevelController.text),
+      photoPath: _photoPath,
+      supplierId: _selectedSupplierId,
+    );
+
+    bool success;
+    if (widget.product == null) {
+      success = await productProvider.addProduct(product);
+    } else {
+      success = await productProvider.updateProduct(product);
+    }
+
+    if (success && mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(widget.product == null 
+              ? 'Nadagdag na ang product' 
+              : 'Na-update na ang product'),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.product == null ? 'Magdagdag ng Product' : 'I-edit ang Product'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Photo section
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[400]!),
+                  ),
+                  child: _photoPath != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(_photoPath!),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                child: Icon(Icons.image, size: 64, color: Colors.grey),
+                              );
+                            },
+                          ),
+                        )
+                      : const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_photo_alternate, size: 64, color: Colors.grey),
+                              SizedBox(height: 8),
+                              Text('Mag-tap para magdagdag ng photo', style: TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                ),
+              ),
+              if (_photoPath != null) ...[
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _photoPath = null;
+                    });
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Alisin ang photo'),
+                ),
+              ],
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Pangalan ng Product',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Paki-ilagay ang pangalan ng product';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _quantityController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Dami (Original Stock)',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Paki-ilagay ang dami';
+                  }
+                  if (int.tryParse(value) == null || int.tryParse(value)! < 0) {
+                    return 'Dapat ay positive na number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _refundedStockController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Refunded Stock (Optional)',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value != null && value.trim().isNotEmpty) {
+                    if (int.tryParse(value) == null || int.tryParse(value)! < 0) {
+                      return 'Dapat ay positive na number';
+                    }
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _buyPriceController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'Presyo ng Bili (₱)',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Paki-ilagay ang presyo ng bili';
+                  }
+                  if (double.tryParse(value) == null || double.parse(value) < 0) {
+                    return 'Paki-ilagay ang tamang presyo';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _sellPriceController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'Presyo ng Benta (₱)',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Paki-ilagay ang presyo ng benta';
+                  }
+                  if (double.tryParse(value) == null || double.parse(value) < 0) {
+                    return 'Paki-ilagay ang tamang presyo';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _reorderLevelController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Reorder Level',
+                  border: OutlineInputBorder(),
+                  helperText: 'Minimum stock bago mag-alert',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Paki-ilagay ang reorder level';
+                  }
+                  if (int.tryParse(value) == null || int.parse(value) < 0) {
+                    return 'Paki-ilagay ang tamang reorder level';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              Consumer<SupplierProvider>(
+                builder: (context, supplierProvider, child) {
+                  if (supplierProvider.suppliers.isEmpty) {
+                    return const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Text('Wala pang suppliers. Magdagdag muna ng supplier.'),
+                      ),
+                    );
+                  }
+
+                  return DropdownButtonFormField<int>(
+                    value: _selectedSupplierId,
+                    decoration: const InputDecoration(
+                      labelText: 'Supplier (Optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: supplierProvider.suppliers.map((supplier) {
+                      return DropdownMenuItem<int>(
+                        value: supplier.id,
+                        child: Text(supplier.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedSupplierId = value;
+                      });
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _saveProduct,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+                child: Text(
+                  widget.product == null ? 'Magdagdag' : 'I-update',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
