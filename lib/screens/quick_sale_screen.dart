@@ -131,16 +131,14 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
       ),
     );
 
-    if (result == false && mounted) {
-      // Cart was cleared
+    if (result == true && mounted) {
+      // Sale completed - clear the cart
       setState(() {
         _cart.clear();
       });
-    } else if (result == true && mounted) {
-      // Sale completed
-      setState(() {
-        _cart.clear();
-      });
+    } else if (mounted) {
+      // User cancelled or went back - just rebuild to show updated cart state
+      setState(() {});
     }
   }
 

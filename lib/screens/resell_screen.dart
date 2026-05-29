@@ -40,7 +40,6 @@ class _ResellScreenState extends State<ResellScreen> {
     final productProvider = context.read<ProductProvider>();
     final refundProvider = context.read<RefundProvider>();
 
-    // Ensure products are loaded first
     if (productProvider.products.isEmpty) {
       await productProvider.loadProducts();
     }
@@ -157,14 +156,17 @@ class _ResellScreenState extends State<ResellScreen> {
       MaterialPageRoute(
         builder: (context) => ResellCheckoutScreen(cart: _cart),
       ),
-    ).then((_) {
-      setState(() {
-        _cart.clear();
-      });
+    ).then((result) {
+      if (result == true && mounted) {
+        setState(() {
+          _cart.clear();
+        });
+      } else if (mounted) {
+        setState(() {});
+      }
     });
   }
 
-  // Tutorial Dialog para sa Re-Sell Tab
   void _showHelpDialog() {
     showDialog(
       context: context,
@@ -264,7 +266,6 @@ class _ResellScreenState extends State<ResellScreen> {
             },
             icon: const Icon(Icons.refresh),
           ),
-          // Idinagdag na "Paano?" Button
           TextButton(
             onPressed: _showHelpDialog,
             child: const Text(
@@ -356,7 +357,6 @@ class _ResellScreenState extends State<ResellScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product photo or placeholder - 40% of card
                   Expanded(
                     flex: 5,
                     child: Container(
@@ -380,7 +380,6 @@ class _ResellScreenState extends State<ResellScreen> {
                           : const Icon(Icons.image, size: 48, color: Colors.grey),
                     ),
                   ),
-                  // Text section - 60% of card
                   Expanded(
                     flex: 3,
                     child: Padding(
@@ -478,7 +477,6 @@ class _ResellScreenState extends State<ResellScreen> {
               ),
             ),
           ),
-          // Delete button
           Positioned(
             top: 4,
             right: 4,
@@ -714,7 +712,6 @@ class _ResellCheckoutScreenState extends State<ResellCheckoutScreen> {
     final saleProvider = context.read<SaleProvider>();
     bool allSuccess = true;
 
-    // Calculate total cash paid and change
     final cashPaid = double.tryParse(_cashController.text) ?? 0;
     final changeGiven = _change;
 
@@ -728,14 +725,11 @@ class _ResellCheckoutScreenState extends State<ResellCheckoutScreen> {
           amountPaid: cashPaid,
           changeGiven: changeGiven,
         );
-        if (!success) {
-          allSuccess = false;
-        }
+        if (!success) allSuccess = false;
       }
     }
 
     if (allSuccess && mounted) {
-      // Refresh product list to update stock in Inventory tab
       context.read<ProductProvider>().loadProducts();
       Navigator.pop(context, true);
       ScaffoldMessenger.of(context).showSnackBar(
