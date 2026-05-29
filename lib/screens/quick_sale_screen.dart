@@ -49,16 +49,78 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
   }
 
   void _addToCart(Product product) {
-    if (product.quantity <= 0) {
+    final currentInCart = _cart[product.id!] ?? 0;
+    final maxQuantity = product.quantity - currentInCart;
+
+    if (maxQuantity <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${product.name} - wala nang stock')),
       );
       return;
     }
 
-    setState(() {
-      _cart[product.id!] = (_cart[product.id!] ?? 0) + 1;
-    });
+    int quantityToAdd = 1;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Magdagdag ng ${product.name}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Stock available: ${product.quantity}'),
+              Text('In Cart: $currentInCart'),
+              const SizedBox(height: 16),
+              const Text(
+                'Ilang units ang idadagdag?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: quantityToAdd > 1
+                        ? () => setDialogState(() => quantityToAdd--)
+                        : null,
+                    icon: const Icon(Icons.remove),
+                  ),
+                  Text(
+                    '$quantityToAdd / $maxQuantity',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: quantityToAdd < maxQuantity
+                        ? () => setDialogState(() => quantityToAdd++)
+                        : null,
+                    icon: const Icon(Icons.add),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Kanselahin'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  _cart[product.id!] = currentInCart + quantityToAdd;
+                });
+              },
+              child: const Text('Idagdag', style: TextStyle(color: Colors.orange)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _navigateToCheckout() async {

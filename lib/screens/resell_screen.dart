@@ -39,12 +39,12 @@ class _ResellScreenState extends State<ResellScreen> {
   Future<void> _loadRefundReasons() async {
     final productProvider = context.read<ProductProvider>();
     final refundProvider = context.read<RefundProvider>();
-    
+
     // Ensure products are loaded first
     if (productProvider.products.isEmpty) {
       await productProvider.loadProducts();
     }
-    
+
     for (final product in productProvider.products) {
       if (product.refundedStock > 0 && product.id != null) {
         final refunds = await refundProvider.getRefundsByProductId(product.id!);
@@ -56,6 +56,7 @@ class _ResellScreenState extends State<ResellScreen> {
       }
     }
   }
+
   double get _total {
     final productProvider = context.read<ProductProvider>();
     double total = 0;
@@ -77,15 +78,77 @@ class _ResellScreenState extends State<ResellScreen> {
     }
 
     final currentInCart = _cart[product.id!] ?? 0;
-    if (product.refundedStock <= currentInCart) {
+    final maxQuantity = product.refundedStock - currentInCart;
+
+    if (maxQuantity <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Sobra na ang quantity sa refunded stock')),
       );
       return;
     }
-    setState(() {
-      _cart[product.id!] = currentInCart + 1;
-    });
+
+    int quantityToAdd = 1;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Magdagdag ng ${product.name}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Refunded Stock available: ${product.refundedStock}'),
+              Text('In Cart: $currentInCart'),
+              const SizedBox(height: 16),
+              const Text(
+                'Ilang units ang idadagdag?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: quantityToAdd > 1
+                        ? () => setDialogState(() => quantityToAdd--)
+                        : null,
+                    icon: const Icon(Icons.remove),
+                  ),
+                  Text(
+                    '$quantityToAdd / $maxQuantity',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: quantityToAdd < maxQuantity
+                        ? () => setDialogState(() => quantityToAdd++)
+                        : null,
+                    icon: const Icon(Icons.add),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Kanselahin'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  _cart[product.id!] = currentInCart + quantityToAdd;
+                });
+              },
+              child: const Text('Idagdag', style: TextStyle(color: Colors.orange)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _navigateToCheckout() {
@@ -331,90 +394,90 @@ class _ResellScreenState extends State<ResellScreen> {
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '₱${product.sellPrice.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[700],
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Ref: ${product.refundedStock}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.orange[700],
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '₱${product.sellPrice.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Ref: ${product.refundedStock}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.orange[700],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  if (_refundReasons[product.id] != null && _refundReasons[product.id]!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () => _showRefundReasonsDialog(product),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: 10,
+                              color: Colors.blue.shade700,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              '${_refundReasons[product.id]!.length}',
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: Colors.blue.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (inCart > 0) ...[
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        'In Cart: $inCart',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              if (_refundReasons[product.id] != null && _refundReasons[product.id]!.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                GestureDetector(
-                  onTap: () => _showRefundReasonsDialog(product),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: Colors.blue.shade200),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 10,
-                          color: Colors.blue.shade700,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          '${_refundReasons[product.id]!.length}',
-                          style: TextStyle(
-                            fontSize: 9,
-                            color: Colors.blue.shade700,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-              if (inCart > 0) ...[
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    'In Cart: $inCart',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
-        ),
-      ),
           // Delete button
           Positioned(
             top: 4,
@@ -751,7 +814,7 @@ class _ResellCheckoutScreenState extends State<ResellCheckoutScreen> {
                       final entry = widget.cart.entries.elementAt(index);
                       final product = context.read<ProductProvider>().getProductById(entry.key);
                       if (product == null) return const SizedBox.shrink();
-                      
+
                       return Card(
                         child: ListTile(
                           leading: CircleAvatar(
@@ -779,9 +842,72 @@ class _ResellCheckoutScreenState extends State<ResellCheckoutScreen> {
                               IconButton(
                                 icon: const Icon(Icons.remove_circle_outline),
                                 onPressed: () {
-                                  setState(() {
-                                    widget.cart.remove(entry.key);
-                                  });
+                                  final currentQuantity = entry.value;
+                                  int quantityToRemove = 1;
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => StatefulBuilder(
+                                      builder: (context, setDialogState) => AlertDialog(
+                                        title: Text('Alisin ang ${product.name}'),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text('In Cart: $currentQuantity'),
+                                            const SizedBox(height: 16),
+                                            const Text(
+                                              'Ilang units ang aalisin?',
+                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                IconButton(
+                                                  onPressed: quantityToRemove > 1
+                                                      ? () => setDialogState(() => quantityToRemove--)
+                                                      : null,
+                                                  icon: const Icon(Icons.remove),
+                                                ),
+                                                Text(
+                                                  '$quantityToRemove / $currentQuantity',
+                                                  style: const TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  onPressed: quantityToRemove < currentQuantity
+                                                      ? () => setDialogState(() => quantityToRemove++)
+                                                      : null,
+                                                  icon: const Icon(Icons.add),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context),
+                                            child: const Text('Kanselahin'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              setState(() {
+                                                if (quantityToRemove >= currentQuantity) {
+                                                  widget.cart.remove(entry.key);
+                                                } else {
+                                                  widget.cart[entry.key] = currentQuantity - quantityToRemove;
+                                                }
+                                              });
+                                            },
+                                            child: const Text('Alisin', style: TextStyle(color: Colors.red)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
                                 },
                                 tooltip: 'Alisin',
                               ),

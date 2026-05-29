@@ -185,9 +185,72 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               IconButton(
                                 icon: const Icon(Icons.remove_circle_outline),
                                 onPressed: () {
-                                  setState(() {
-                                    widget.cart.remove(entry.key);
-                                  });
+                                  final currentQuantity = entry.value;
+                                  int quantityToRemove = 1;
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => StatefulBuilder(
+                                      builder: (context, setDialogState) => AlertDialog(
+                                        title: Text('Alisin ang ${product.name}'),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text('In Cart: $currentQuantity'),
+                                            const SizedBox(height: 16),
+                                            const Text(
+                                              'Ilang units ang aalisin?',
+                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                IconButton(
+                                                  onPressed: quantityToRemove > 1
+                                                      ? () => setDialogState(() => quantityToRemove--)
+                                                      : null,
+                                                  icon: const Icon(Icons.remove),
+                                                ),
+                                                Text(
+                                                  '$quantityToRemove / $currentQuantity',
+                                                  style: const TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  onPressed: quantityToRemove < currentQuantity
+                                                      ? () => setDialogState(() => quantityToRemove++)
+                                                      : null,
+                                                  icon: const Icon(Icons.add),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context),
+                                            child: const Text('Kanselahin'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              setState(() {
+                                                if (quantityToRemove >= currentQuantity) {
+                                                  widget.cart.remove(entry.key);
+                                                } else {
+                                                  widget.cart[entry.key] = currentQuantity - quantityToRemove;
+                                                }
+                                              });
+                                            },
+                                            child: const Text('Alisin', style: TextStyle(color: Colors.red)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
                                 },
                                 tooltip: 'Alisin',
                               ),
