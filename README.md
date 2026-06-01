@@ -7,6 +7,10 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 ### Core Functionality
 - **Product Catalog**: Add, edit, and delete products with name, quantity, buying price, selling price, reorder level, and optional product photos
 - **Quick Sale Screen**: Fast point-of-sale interface with product tiles in a grid layout, cart functionality, and automatic stock deduction
+- **Quantity Picker**: Select multiple units when adding products to cart in Sell and Re-Sell tabs
+- **Partial Removal**: Remove specific quantities from cart instead of all items
+- **Refund Management**: Process refunds with quantity selection and reason tracking
+- **Re-Sell Feature**: Resell refunded products with dedicated cart and checkout flow
 - **Low-Stock Alerts**: Automatic notifications when products fall below their reorder level (both on app start and after each sale)
 - **Profit Summary Chart**: Visual profit analysis with daily (last 7 days) and weekly (last 4 weeks) views using fl_chart
 - **Supplier Management**: Track suppliers with contact information and last restock dates
@@ -22,9 +26,10 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 ## Tech Stack
 
 ### Frontend
-- **Flutter**: Latest stable version
-- **SQLite**: sqflite for local database storage
-- **State Management**: Provider
+- **Framework**: Flutter (Dart) - Latest stable version
+- **Language**: Dart
+- **Database**: SQLite (via sqflite) for local database storage
+- **State Management**: Provider pattern
 - **HTTP**: Dio (for future sync capabilities)
 - **Connectivity**: connectivity_plus
 - **Notifications**: flutter_local_notifications
@@ -33,12 +38,38 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 - **Date Formatting**: intl
 
 ### Architecture
-- **Models**: Data models for Product, Sale, Supplier, SyncQueue
-- **Database**: SQLite with proper schema and indexes
+- **Pattern**: MVC-like (Models, Providers/Screens, Views)
+- **Models**: Data models for Product, Sale, Refund, Supplier
+- **Database**: SQLite with proper schema, indexes, and migrations
 - **Repositories**: Data access layer abstracting database operations
 - **Providers**: State management with ChangeNotifier
 - **Services**: Notification service, image service, seed data service
 - **Screens**: Modular UI components for each feature
+
+### Object-Oriented Programming (OOP)
+The application extensively uses OOP principles:
+
+- **Classes and Inheritance**:
+  - `StatefulWidget` and `State` for UI components
+  - Base models with `toMap()`, `fromMap()`, and `copyWith()` methods
+  - Provider classes extending `ChangeNotifier`
+
+- **Encapsulation**:
+  - Private fields with public getters/setters
+  - State management through providers
+  - Database operations abstracted through repositories
+
+- **Models**:
+  - `Product` - Product data model with stock management
+  - `Sale` - Sale transaction model with payment tracking
+  - `Refund` - Refund transaction model with quantity tracking
+  - `Supplier` - Supplier information model
+
+- **Providers**:
+  - `ProductProvider` - Product state and stock management
+  - `SaleProvider` - Sales and profit calculation logic
+  - `RefundProvider` - Refund tracking and aggregation
+  - `SupplierProvider` - Supplier data management
 
 ## Database Schema
 
@@ -51,7 +82,8 @@ CREATE TABLE products (
   sell_price REAL NOT NULL,
   reorder_level INTEGER NOT NULL DEFAULT 5,
   photo_path TEXT,
-  supplier_id INTEGER REFERENCES suppliers(id) ON DELETE SET NULL
+  supplier_id INTEGER REFERENCES suppliers(id) ON DELETE SET NULL,
+  refunded_stock INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE sales (
@@ -59,7 +91,19 @@ CREATE TABLE sales (
   product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   qty_sold INTEGER NOT NULL,
   total REAL NOT NULL,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  amount_paid REAL,
+  change_given REAL
+);
+
+CREATE TABLE refunds (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sale_id INTEGER NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  amount REAL NOT NULL,
+  reason TEXT NOT NULL,
+  refunded_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  quantity INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE suppliers (
@@ -90,7 +134,7 @@ CREATE TABLE sync_queue (
 
 1. **Clone or navigate to the project directory**
    ```bash
-   cd mobile_app_test_ideas
+   cd saritrack
    ```
 
 2. **Install dependencies**
@@ -134,11 +178,13 @@ flutter test
 
 ### Making Sales
 1. Navigate to the **Sell** tab
-2. Tap product tiles to add them to your cart
-3. View the cart summary at the bottom
-4. Enter the cash received from the customer
-5. The change is automatically calculated
-6. Tap **Complete Sale** to finalize
+2. Tap product tiles to add them to your cart with quantity picker
+3. Select the quantity to add (limited by available stock)
+4. View the cart summary at the bottom
+5. Tap the cart to view items and remove specific quantities
+6. Enter the cash received from the customer
+7. The change is automatically calculated
+8. Tap **Complete Sale** to finalize
 
 ### Viewing Reports
 1. Navigate to the **Reports** tab
@@ -160,30 +206,55 @@ flutter test
 - Products below their reorder level are highlighted in red in the inventory list
 - A "Low Stock" badge appears on affected product cards
 
+### Processing Refunds
+1. Navigate to the **Refund** tab
+2. View sales history with refund status
+3. Tap on a sale to process a refund
+4. Select the quantity to refund (up to the sold quantity)
+5. Enter the reason for the refund
+6. Tap **Confirm Refund** to process
+7. Refunded stock is automatically added to the product's refunded stock
+8. Profit calculations are updated to exclude refunded items
+
+### Re-Selling Refunded Products
+1. Navigate to the **Re-Sell** tab
+2. View products with refunded stock (marked with "Ref:")
+3. Tap a product to add to re-sell cart with quantity picker
+4. View refund reasons by tapping the info icon (i)
+5. Remove refunded stock by tapping the trash icon
+6. Navigate to checkout and complete the re-sale
+7. Stock is automatically deducted from refunded stock
+
 ## Project Structure
 
 ```
 lib/
 ├── database/
-│   └── database_helper.dart      # SQLite database operations
+│   └── database_helper.dart      # SQLite database operations and migrations
 ├── models/
-│   ├── product.dart              # Product data model
-│   ├── sale.dart                 # Sale data model
-│   ├── supplier.dart             # Supplier data model
-│   └── sync_queue.dart           # Sync queue data model
+│   ├── product.dart              # Product data model with stock management
+│   ├── sale.dart                 # Sale data model with payment tracking
+│   ├── refund.dart               # Refund data model with quantity tracking
+│   └── supplier.dart             # Supplier data model
 ├── providers/
-│   ├── product_provider.dart     # Product state management
-│   ├── sale_provider.dart        # Sale state management
-│   └── supplier_provider.dart    # Supplier state management
+│   ├── product_provider.dart     # Product state and stock management
+│   ├── sale_provider.dart        # Sales and profit calculation logic
+│   ├── refund_provider.dart      # Refund tracking and aggregation
+│   └── supplier_provider.dart    # Supplier data management
 ├── repositories/
 │   ├── product_repository.dart   # Product data access
 │   ├── sale_repository.dart      # Sale data access
+│   ├── refund_repository.dart    # Refund data access
 │   └── supplier_repository.dart  # Supplier data access
 ├── screens/
 │   ├── home_screen.dart          # Main screen with bottom navigation
 │   ├── product_catalog_screen.dart
 │   ├── product_form_screen.dart
-│   ├── quick_sale_screen.dart
+│   ├── quick_sale_screen.dart    # Sell tab with quantity picker
+│   ├── checkout_screen.dart      # Cart screen with partial removal
+│   ├── resell_screen.dart        # Re-Sell tab for refunded products
+│   ├── resell_checkout_screen.dart # Re-Sell cart checkout
+│   ├── refund_screen.dart       # Refund management screen
 │   ├── profit_chart_screen.dart
 │   ├── supplier_list_screen.dart
 │   └── supplier_form_screen.dart
