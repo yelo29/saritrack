@@ -67,8 +67,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class ReportsScreen extends StatelessWidget {
+class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
+
+  @override
+  State<ReportsScreen> createState() => _ReportsScreenState();
+}
+
+class _ReportsScreenState extends State<ReportsScreen> {
+  final PageController _pageController = PageController();
+  int _currentIndex = 0;
+
+  final List<String> _tabNames = [
+    'Profit Chart',
+    'Suppliers',
+    'Refunds',
+    'Sales History',
+    'Expenses',
+    'Customers',
+  ];
+
+  final List<Widget> _tabScreens = [
+    const ProfitChartScreen(),
+    const SupplierListScreen(),
+    const RefundScreen(),
+    const SalesHistoryScreen(),
+    const ExpenseScreen(),
+    const CustomerScreen(),
+  ];
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   // Tutorial Dialog para sa Reports Tab
   void _showHelpDialog(BuildContext context) {
@@ -190,57 +222,72 @@ class ReportsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 6,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Ulat'),
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          actions: [
-            // Idinagdag na "Paano?" Button
-            TextButton(
-              onPressed: () => _showHelpDialog(context),
-              child: const Text(
-                'Paano?',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ulat'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          // Dropdown button for tabs
+          PopupMenuButton<int>(
+            icon: const Icon(Icons.menu),
+            tooltip: 'Mga tabs dito',
+            onSelected: (index) {
+              setState(() {
+                _currentIndex = index;
+                _pageController.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              });
+            },
+            itemBuilder: (context) => List.generate(
+              _tabNames.length,
+              (index) => PopupMenuItem<int>(
+                value: index,
+                child: Row(
+                  children: [
+                    if (_currentIndex == index)
+                      const Icon(Icons.check, color: Colors.orange, size: 20),
+                    const SizedBox(width: 8),
+                    Text(_tabNames[index]),
+                  ],
                 ),
               ),
             ),
-            // Idinagdag na "Terms & Policy" Button
-            TextButton(
-              onPressed: () => _showTermsDialog(context),
-              child: const Text(
-                'Policy',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Profit Chart'),
-              Tab(text: 'Suppliers'),
-              Tab(text: 'Refunds'),
-              Tab(text: 'Sales History'),
-              Tab(text: 'Expenses'),
-              Tab(text: 'Customers'),
-            ],
           ),
-        ),
-        body: const TabBarView(
-          children: [
-            ProfitChartScreen(),
-            SupplierListScreen(),
-            RefundScreen(),
-            SalesHistoryScreen(),
-            ExpenseScreen(),
-            CustomerScreen(),
-          ],
-        ),
+          // Idinagdag na "Paano?" Button
+          TextButton(
+            onPressed: () => _showHelpDialog(context),
+            child: const Text(
+              'Paano?',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // Idinagdag na "Terms & Policy" Button
+          TextButton(
+            onPressed: () => _showTermsDialog(context),
+            child: const Text(
+              'Policy',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        children: _tabScreens,
       ),
     );
   }
