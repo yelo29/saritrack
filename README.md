@@ -13,6 +13,7 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 - **Re-Sell Feature**: Resell refunded products with dedicated cart and checkout flow
 - **Utang/Credit Tracking**: Track customer credits (utang) with customer management, credit limits, payment recording, and checkout integration
 - **Expense Tracking**: Record business expenses (utilities, supplies, rent, salary, etc.) with category-based organization
+- **Local Backup/Restore**: Export database to JSON file for data safety and restore from backup when switching devices or recovering data
 - **Low-Stock Alerts**: Automatic notifications when products fall below their reorder level (both on app start and after each sale)
 - **Profit Summary Chart**: Visual profit analysis with daily (last 7 days) and weekly (last 4 weeks) views using fl_chart (profit = sales - expenses)
 - **Supplier Management**: Track suppliers with contact information and last restock dates
@@ -277,6 +278,16 @@ flutter test
 9. To record a sale as utang, toggle **Utang (Credit)** in the checkout screen and select a customer
 10. The customer's balance will automatically update after the transaction
 
+### Backup and Restore Data
+1. Navigate to the **Reports** tab
+2. Select the **Backup/Restore** tab
+3. To backup: Tap the **I-backup** button to export your database to a JSON file
+4. Share the backup file to a safe location (Google Drive, USB, email, etc.)
+5. To restore: Tap the **I-restore** button and select a backup JSON file
+6. Choose between **Replace** (deletes all existing data and restores from backup) or **Merge** (combines backup with existing data)
+7. Wait for the restore process to complete
+8. The app will display a success message when done
+
 ## Project Structure
 
 ```
@@ -320,13 +331,15 @@ lib/
 │   ├── expense_screen.dart       # Expense tracking screen
 │   ├── customer_screen.dart      # Customer management screen
 │   ├── utang_payment_screen.dart # Utang payment recording screen
+│   ├── backup_restore_screen.dart # Backup and restore screen
 │   ├── profit_chart_screen.dart
 │   ├── supplier_list_screen.dart
 │   └── supplier_form_screen.dart
 ├── services/
 │   ├── notification_service.dart # Low-stock notifications
 │   ├── image_service.dart         # Image picking and compression
-│   └── seed_data_service.dart    # Sample data seeding
+│   ├── seed_data_service.dart    # Sample data seeding
+│   └── backup_service.dart       # Database backup and restore
 └── main.dart                     # App entry point
 ```
 

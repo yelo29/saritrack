@@ -8,6 +8,7 @@ import 'resell_screen.dart';
 import 'sales_history_screen.dart';
 import 'expense_screen.dart';
 import 'customer_screen.dart';
+import 'backup_restore_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -85,6 +86,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     'Sales History',
     'Expenses',
     'Customers',
+    'Backup/Restore',
   ];
 
   final List<Widget> _tabScreens = [
@@ -94,6 +96,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     const SalesHistoryScreen(),
     const ExpenseScreen(),
     const CustomerScreen(),
+    const BackupRestoreScreen(),
   ];
 
   @override
@@ -153,6 +156,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     const TextSpan(text: ' bawat customer at matunton ang kanilang '),
                     const TextSpan(text: 'utang (credit)', style: TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: ' at mga bayad. Sa checkout, pwede mong i-toggle ang "Utang" para irecord ang benta bilang utang.\n\n'),
+                    const TextSpan(text: '7. Backup/Restore Tab: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: 'Dito mo pwedeng i-backup ang iyong database sa JSON file para sa '),
+                    const TextSpan(text: 'data safety', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: '. Maaari mo ring i-restore ang data mula sa backup file kapag nagbago ng device o nawala ang data. Pumili sa pagitan ng '),
+                    const TextSpan(text: 'Replace', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: ' (burahin lahat at ilagay ang backup) o '),
+                    const TextSpan(text: 'Merge', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: ' (pagsamahin ang backup sa existing data).\n\n'),
                     const TextSpan(text: 'Paalala: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
                     const TextSpan(text: 'Awtomatikong nag-a-update ang mga data na ito sa tuwing may nakukumpletong transaksyon sa Sell o Re-Sell tab.'),
                   ],
