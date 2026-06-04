@@ -1,0 +1,255 @@
+Competitor Features That Work Offline (Detailed Implementation)
+1. Customer Management with Utang Tracking
+How it works offline:
+
+Store customer data locally in SQLite
+Track credit/utang per customer
+Record payments and outstanding balances
+View customer purchase history
+Set credit limits per customer
+Database Schema:
+
+
+
+sql
+CREATE TABLE customers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  contact TEXT,
+  address TEXT,
+  credit_limit REAL DEFAULT 0,
+  current_balance REAL DEFAULT 0
+);
+ 
+CREATE TABLE utang_transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER REFERENCES customers(id),
+  amount REAL NOT NULL,
+  type TEXT NOT NULL, -- 'credit' or 'payment'
+  notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+Relevance: ⭐⭐⭐⭐⭐ HIGHEST - Utang system is core to Filipino sari-sari store culture
+
+2. Barcode Scanning
+How it works offline:
+
+Use camera to scan barcodes (local ML or barcode library)
+Bluetooth barcode scanner integration
+Map barcodes to product IDs locally
+Quick product lookup and add to cart
+Implementation:
+
+Add barcode column to products table
+Use flutter_barcode_scanner or mobile_scanner package
+Cache barcode-to-product mappings locally
+Relevance: ⭐⭐⭐⭐ - Speeds up checkout, common in modern POS
+
+3. Receipt Printing (Bluetooth)
+How it works offline:
+
+Connect to Bluetooth thermal printer (ESC/POS protocol)
+Generate receipt locally
+Print without internet
+Implementation:
+
+Use flutter_bluetooth_serial or esc_pos_utils package
+Store printer pairing info locally
+Generate receipt text/format locally
+Relevance: ⭐⭐⭐⭐ - Professional appearance, customer expectations
+
+4. Discount/Promotion System
+How it works offline:
+
+Define discount rules locally (percentage, fixed amount, buy X get Y)
+Apply discounts at checkout
+Track discount usage
+Database Schema:
+
+
+
+sql
+CREATE TABLE discounts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL, -- 'percentage', 'fixed', 'buy_x_get_y'
+  value REAL NOT NULL,
+  min_quantity INTEGER,
+  applicable_product_ids TEXT, -- JSON array
+  start_date TEXT,
+  end_date TEXT,
+  is_active INTEGER DEFAULT 1
+);
+Relevance: ⭐⭐⭐ - Marketing tool, but less critical for small stores
+
+5. Expense Tracking ✅ COMPLETED
+How it works offline:
+
+Record business expenses (utilities, supplies, personal withdrawals)
+Categorize expenses
+Track net profit (sales - expenses)
+Database Schema:
+
+
+
+sql
+CREATE TABLE expenses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  category TEXT NOT NULL,
+  amount REAL NOT NULL,
+  description TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+Relevance: ⭐⭐⭐⭐⭐ HIGHEST - Essential for accurate profit calculation
+
+6. Advanced Inventory (Expiration Dates)
+How it works offline:
+
+Track expiration dates per batch
+Alert for expiring soon
+Auto-remove expired items
+Database Schema:
+
+
+
+sql
+CREATE TABLE product_batches (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER REFERENCES products(id),
+  quantity INTEGER NOT NULL,
+  expiration_date TEXT,
+  cost_price REAL,
+  received_date TEXT
+);
+Relevance: ⭐⭐⭐ - Important for food/sari-sari stores
+
+7. Local Backup/Restore
+How it works offline:
+
+Export database to local file (JSON/CSV)
+Import from backup file
+No cloud needed
+Implementation:
+
+Use share_plus to save backup to device storage
+Export all tables to JSON
+Import and replace/merge data
+Relevance: ⭐⭐⭐⭐⭐ HIGHEST - Data safety, device transfer
+
+8. Employee/Staff Management
+How it works offline:
+
+Track sales per employee
+Set permissions (admin, cashier)
+Calculate commissions
+Database Schema:
+
+
+
+sql
+CREATE TABLE employees (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL,
+  pin_code TEXT,
+  commission_rate REAL DEFAULT 0
+);
+ 
+-- Add employee_id to sales table
+Relevance: ⭐⭐ - Only if store has multiple staff
+
+9. Tax Management
+How it works offline:
+
+Configure tax rate (e.g., 12% VAT)
+Auto-calculate tax on sales
+Generate tax reports
+Implementation:
+
+Store tax rate in settings table
+Add tax_amount to sales table
+Calculate tax totals in reports
+Relevance: ⭐⭐ - Required for registered businesses, not for informal sari-sari
+
+10. Product Variants
+How it works offline:
+
+Track variants (size, color, flavor)
+Separate stock per variant
+Variant pricing
+Database Schema:
+
+
+
+sql
+CREATE TABLE product_variants (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER REFERENCES products(id),
+  variant_name TEXT NOT NULL,
+  quantity INTEGER NOT NULL,
+  sell_price REAL NOT NULL
+);
+Relevance: ⭐⭐ - Useful for clothing, varied products
+
+11. Purchase Orders
+How it works offline:
+
+Create orders to suppliers
+Track order status
+Auto-add stock when received
+Database Schema:
+
+
+
+sql
+CREATE TABLE purchase_orders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  supplier_id INTEGER REFERENCES suppliers(id),
+  total_amount REAL,
+  status TEXT, -- 'pending', 'received', 'cancelled'
+  created_at TEXT,
+  received_at TEXT
+);
+ 
+CREATE TABLE purchase_order_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id INTEGER REFERENCES purchase_orders(id),
+  product_id INTEGER REFERENCES products(id),
+  quantity INTEGER,
+  unit_price REAL
+);
+Relevance: ⭐⭐⭐ - Helps with restocking workflow
+
+12. CSV/PDF Export
+How it works offline:
+
+Generate reports locally
+Export to CSV/PDF
+Share via file transfer
+Implementation:
+
+Use csv package for CSV
+Use pdf or printing package for PDF
+Save to device storage
+Relevance: ⭐⭐⭐ - For accounting purposes
+
+
+
+
+Recommended Priority (Offline-Only)
+Tier 1: Must-Have (Highest Impact)
+Utang/Credit Tracking - Unique to PH market, high demand
+Expense Tracking ✅ COMPLETED - Essential for accurate profit
+Local Backup/Restore - Data safety
+Tier 2: High Value
+Barcode Scanning - Speed and professionalism
+Receipt Printing - Customer expectations
+Expiration Date Tracking - Inventory management
+Tier 3: Nice-to-Have
+Discount System - Marketing
+Purchase Orders - Restocking workflow
+CSV/PDF Export - Accounting
+Product Variants - For specific product types
+Tier 4: Low Priority
+Employee Management - Only for multi-staff
+Tax Management - Not needed for informal stores

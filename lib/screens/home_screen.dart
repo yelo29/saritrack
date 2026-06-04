@@ -6,6 +6,7 @@ import 'supplier_list_screen.dart';
 import 'refund_screen.dart';
 import 'resell_screen.dart';
 import 'sales_history_screen.dart';
+import 'expense_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -109,6 +110,10 @@ class ReportsScreen extends StatelessWidget {
                     const TextSpan(text: 'Dito mo makikita ang buong kasaysayan ng benta. Maaari mong i-filter ayon sa petsa at hanapin ang mga produkto. Nakikita mo rin ang '),
                     const TextSpan(text: 'kabuuang benta', style: TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: ' at bilang ng aytem na nabenta.\n\n'),
+                    const TextSpan(text: '5. Expenses Tab: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: 'Dito mo matutunton ang lahat ng gastusin ng negosyo tulad ng utilities, supplies, at iba pa. Makakatulong ito sa '),
+                    const TextSpan(text: 'tumpak na kalkulasyon ng tunay na kita', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: ' (sales minus expenses).\n\n'),
                     const TextSpan(text: 'Paalala: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
                     const TextSpan(text: 'Awtomatikong nag-a-update ang mga data na ito sa tuwing may nakukumpletong transaksyon sa Sell o Re-Sell tab.'),
                   ],
@@ -179,7 +184,7 @@ class ReportsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Ulat'),
@@ -214,6 +219,7 @@ class ReportsScreen extends StatelessWidget {
               Tab(text: 'Suppliers'),
               Tab(text: 'Refunds'),
               Tab(text: 'Sales History'),
+              Tab(text: 'Expenses'),
             ],
           ),
         ),
@@ -223,6 +229,7 @@ class ReportsScreen extends StatelessWidget {
             SupplierListScreen(),
             RefundScreen(),
             SalesHistoryScreen(),
+            ExpenseScreen(),
           ],
         ),
       ),

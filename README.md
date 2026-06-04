@@ -11,8 +11,9 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 - **Partial Removal**: Remove specific quantities from cart instead of all items
 - **Refund Management**: Process refunds with quantity selection and reason tracking
 - **Re-Sell Feature**: Resell refunded products with dedicated cart and checkout flow
+- **Expense Tracking**: Record business expenses (utilities, supplies, rent, salary, etc.) with category-based organization
 - **Low-Stock Alerts**: Automatic notifications when products fall below their reorder level (both on app start and after each sale)
-- **Profit Summary Chart**: Visual profit analysis with daily (last 7 days) and weekly (last 4 weeks) views using fl_chart
+- **Profit Summary Chart**: Visual profit analysis with daily (last 7 days) and weekly (last 4 weeks) views using fl_chart (profit = sales - expenses)
 - **Supplier Management**: Track suppliers with contact information and last restock dates
 
 ### Technical Features
@@ -121,6 +122,14 @@ CREATE TABLE sync_queue (
   timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
   retries INTEGER DEFAULT 0
 );
+
+CREATE TABLE expenses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  category TEXT NOT NULL,
+  amount REAL NOT NULL,
+  description TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ## Setup Instructions
@@ -225,6 +234,17 @@ flutter test
 6. Navigate to checkout and complete the re-sale
 7. Stock is automatically deducted from refunded stock
 
+### Tracking Expenses
+1. Navigate to the **Reports** tab
+2. Select the **Expenses** tab
+3. Tap the **+** floating action button to add a new expense
+4. Select a category (Utilities, Supplies, Rent, Salary, Transportation, Food, Miscellaneous, Others)
+5. Enter the amount and optional description
+6. Tap **Idagdag** to save the expense
+7. View total expenses at the top of the screen
+8. Tap on an expense to edit or delete it
+9. Profit calculations automatically subtract expenses from sales
+
 ## Project Structure
 
 ```
@@ -235,17 +255,20 @@ lib/
 │   ├── product.dart              # Product data model with stock management
 │   ├── sale.dart                 # Sale data model with payment tracking
 │   ├── refund.dart               # Refund data model with quantity tracking
-│   └── supplier.dart             # Supplier data model
+│   ├── supplier.dart             # Supplier data model
+│   └── expense.dart              # Expense data model
 ├── providers/
 │   ├── product_provider.dart     # Product state and stock management
 │   ├── sale_provider.dart        # Sales and profit calculation logic
 │   ├── refund_provider.dart      # Refund tracking and aggregation
-│   └── supplier_provider.dart    # Supplier data management
+│   ├── supplier_provider.dart    # Supplier data management
+│   └── expense_provider.dart     # Expense state management
 ├── repositories/
 │   ├── product_repository.dart   # Product data access
 │   ├── sale_repository.dart      # Sale data access
 │   ├── refund_repository.dart    # Refund data access
-│   └── supplier_repository.dart  # Supplier data access
+│   ├── supplier_repository.dart  # Supplier data access
+│   └── expense_repository.dart   # Expense data access
 ├── screens/
 │   ├── home_screen.dart          # Main screen with bottom navigation
 │   ├── product_catalog_screen.dart
@@ -255,6 +278,8 @@ lib/
 │   ├── resell_screen.dart        # Re-Sell tab for refunded products
 │   ├── resell_checkout_screen.dart # Re-Sell cart checkout
 │   ├── refund_screen.dart       # Refund management screen
+│   ├── sales_history_screen.dart # Sales history viewer
+│   ├── expense_screen.dart       # Expense tracking screen
 │   ├── profit_chart_screen.dart
 │   ├── supplier_list_screen.dart
 │   └── supplier_form_screen.dart

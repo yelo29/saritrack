@@ -6,11 +6,13 @@ import '../models/product.dart';
 import '../services/notification_service.dart';
 import '../repositories/refund_repository.dart';
 import '../models/refund.dart';
+import '../repositories/expense_repository.dart';
 
 class SaleProvider with ChangeNotifier {
   final SaleRepository _repository = SaleRepository();
   final ProductRepository _productRepository = ProductRepository();
   final RefundRepository _refundRepository = RefundRepository();
+  final ExpenseRepository _expenseRepository = ExpenseRepository();
   
   List<Sale> _sales = [];
   List<Sale> get sales => _sales;
@@ -101,7 +103,7 @@ class SaleProvider with ChangeNotifier {
     return await _repository.getRecentSales(days);
   }
 
-  // Calculate profit for a date range (excluding refunded items)
+  // Calculate profit for a date range (excluding refunded items and subtracting expenses)
   Future<double> calculateProfit(String startDate, String endDate) async {
     final sales = await getSalesByDateRange(startDate, endDate);
     double totalProfit = 0;
@@ -124,6 +126,10 @@ class SaleProvider with ChangeNotifier {
         totalProfit += profit;
       }
     }
+
+    // Subtract expenses from profit
+    final totalExpenses = await _expenseRepository.getTotalExpensesByDateRange(startDate, endDate);
+    totalProfit -= totalExpenses;
 
     return totalProfit;
   }

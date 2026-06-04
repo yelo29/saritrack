@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 6,
+      version: 7,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -100,6 +100,18 @@ class DatabaseHelper {
     await db.execute('CREATE INDEX idx_sales_created_at ON sales(created_at)');
     await db.execute('CREATE INDEX idx_products_supplier_id ON products(supplier_id)');
     await db.execute('CREATE INDEX idx_refunds_sale_id ON refunds(sale_id)');
+
+    // Create expenses table
+    await db.execute('''
+      CREATE TABLE expenses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category TEXT NOT NULL,
+        amount REAL NOT NULL,
+        description TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_expenses_created_at ON expenses(created_at)');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -136,6 +148,19 @@ class DatabaseHelper {
     if (oldVersion < 6) {
       // Add quantity column to refunds table
       await db.execute('ALTER TABLE refunds ADD COLUMN quantity INTEGER NOT NULL DEFAULT 0');
+    }
+    if (oldVersion < 7) {
+      // Create expenses table
+      await db.execute('''
+        CREATE TABLE expenses (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          category TEXT NOT NULL,
+          amount REAL NOT NULL,
+          description TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      ''');
+      await db.execute('CREATE INDEX idx_expenses_created_at ON expenses(created_at)');
     }
   }
 
@@ -334,5 +359,56 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  // Expense CRUD operations
+  Future<int> createExpense(Map<String, dynamic> expense) async {
+    final db = await instance.database;
+    return await db.insert('expenses', expense);
+  }
+
+  Future<List<Map<String, dynamic>>> getAllExpenses() async {
+    final db = await instance.database;
+    final result = await db.query('expenses', orderBy: 'created_at DESC');
+    return result;
+  }
+
+  Future<List<Map<String, dynamic>>> getExpensesByDateRange(String startDate, String endDate) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'expenses',
+      where: 'created_at BETWEEN ? AND ?',
+      whereArgs: [startDate, endDate],
+      orderBy: 'created_at DESC',
+    );
+    return result;
+  }
+
+  Future<int> updateExpense(int id, Map<String, dynamic> expense) async {
+    final db = await instance.database;
+    return await db.update(
+      'expenses',
+      expense,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> deleteExpense(int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'expenses',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<double> getTotalExpensesByDateRange(String startDate, String endDate) async {
+    final db = await instance.database;
+    final result = await db.rawQuery(
+      'SELECT SUM(amount) as total FROM expenses WHERE created_at BETWEEN ? AND ?',
+      [startDate, endDate],
+    );
+    return result.first['total'] as double? ?? 0.0;
   }
 }
