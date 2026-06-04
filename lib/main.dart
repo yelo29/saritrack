@@ -5,6 +5,8 @@ import 'providers/sale_provider.dart';
 import 'providers/supplier_provider.dart';
 import 'providers/refund_provider.dart';
 import 'providers/expense_provider.dart';
+import 'providers/customer_provider.dart';
+import 'providers/utang_transaction_provider.dart';
 import 'screens/home_screen.dart';
 import 'services/seed_data_service.dart';
 import 'services/notification_service.dart';
@@ -32,6 +34,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SupplierProvider()),
         ChangeNotifierProvider(create: (_) => RefundProvider()),
         ChangeNotifierProvider(create: (_) => ExpenseProvider()),
+        ChangeNotifierProvider(create: (_) => CustomerProvider()),
+        ChangeNotifierProvider(create: (_) => UtangTransactionProvider()),
       ],
       child: MaterialApp(
         title: 'SariTrack',

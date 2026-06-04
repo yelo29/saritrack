@@ -11,6 +11,7 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 - **Partial Removal**: Remove specific quantities from cart instead of all items
 - **Refund Management**: Process refunds with quantity selection and reason tracking
 - **Re-Sell Feature**: Resell refunded products with dedicated cart and checkout flow
+- **Utang/Credit Tracking**: Track customer credits (utang) with customer management, credit limits, payment recording, and checkout integration
 - **Expense Tracking**: Record business expenses (utilities, supplies, rent, salary, etc.) with category-based organization
 - **Low-Stock Alerts**: Automatic notifications when products fall below their reorder level (both on app start and after each sale)
 - **Profit Summary Chart**: Visual profit analysis with daily (last 7 days) and weekly (last 4 weeks) views using fl_chart (profit = sales - expenses)
@@ -130,6 +131,25 @@ CREATE TABLE expenses (
   description TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE customers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  contact TEXT,
+  address TEXT,
+  credit_limit REAL DEFAULT 0,
+  current_balance REAL DEFAULT 0
+);
+
+CREATE TABLE utang_transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL,
+  amount REAL NOT NULL,
+  type TEXT NOT NULL,
+  notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+);
 ```
 
 ## Setup Instructions
@@ -245,6 +265,18 @@ flutter test
 8. Tap on an expense to edit or delete it
 9. Profit calculations automatically subtract expenses from sales
 
+### Managing Customers and Utang
+1. Navigate to the **Reports** tab
+2. Select the **Customers** tab
+3. Tap the **+** floating action button to add a new customer
+4. Enter name, contact, address, and optional credit limit
+5. Tap **Idagdag** to save the customer
+6. View customer balance and credit limit on each customer card
+7. Tap on a customer to edit their details
+8. Tap the **Bayad** button to record a payment for a customer with outstanding balance
+9. To record a sale as utang, toggle **Utang (Credit)** in the checkout screen and select a customer
+10. The customer's balance will automatically update after the transaction
+
 ## Project Structure
 
 ```
@@ -256,30 +288,38 @@ lib/
 │   ├── sale.dart                 # Sale data model with payment tracking
 │   ├── refund.dart               # Refund data model with quantity tracking
 │   ├── supplier.dart             # Supplier data model
-│   └── expense.dart              # Expense data model
+│   ├── expense.dart              # Expense data model
+│   ├── customer.dart             # Customer data model
+│   └── utang_transaction.dart    # Utang transaction data model
 ├── providers/
 │   ├── product_provider.dart     # Product state and stock management
 │   ├── sale_provider.dart        # Sales and profit calculation logic
 │   ├── refund_provider.dart      # Refund tracking and aggregation
 │   ├── supplier_provider.dart    # Supplier data management
-│   └── expense_provider.dart     # Expense state management
+│   ├── expense_provider.dart     # Expense state management
+│   ├── customer_provider.dart    # Customer state management
+│   └── utang_transaction_provider.dart # Utang transaction state management
 ├── repositories/
 │   ├── product_repository.dart   # Product data access
 │   ├── sale_repository.dart      # Sale data access
 │   ├── refund_repository.dart    # Refund data access
 │   ├── supplier_repository.dart  # Supplier data access
-│   └── expense_repository.dart   # Expense data access
+│   ├── expense_repository.dart   # Expense data access
+│   ├── customer_repository.dart  # Customer data access
+│   └── utang_transaction_repository.dart # Utang transaction data access
 ├── screens/
 │   ├── home_screen.dart          # Main screen with bottom navigation
 │   ├── product_catalog_screen.dart
 │   ├── product_form_screen.dart
 │   ├── quick_sale_screen.dart    # Sell tab with quantity picker
-│   ├── checkout_screen.dart      # Cart screen with partial removal
+│   ├── checkout_screen.dart      # Cart screen with partial removal and utang support
 │   ├── resell_screen.dart        # Re-Sell tab for refunded products
 │   ├── resell_checkout_screen.dart # Re-Sell cart checkout
 │   ├── refund_screen.dart       # Refund management screen
 │   ├── sales_history_screen.dart # Sales history viewer
 │   ├── expense_screen.dart       # Expense tracking screen
+│   ├── customer_screen.dart      # Customer management screen
+│   ├── utang_payment_screen.dart # Utang payment recording screen
 │   ├── profit_chart_screen.dart
 │   ├── supplier_list_screen.dart
 │   └── supplier_form_screen.dart

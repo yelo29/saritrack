@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 7,
+      version: 8,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -112,6 +112,33 @@ class DatabaseHelper {
       )
     ''');
     await db.execute('CREATE INDEX idx_expenses_created_at ON expenses(created_at)');
+
+    // Create customers table
+    await db.execute('''
+      CREATE TABLE customers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        contact TEXT,
+        address TEXT,
+        credit_limit REAL DEFAULT 0,
+        current_balance REAL DEFAULT 0
+      )
+    ''');
+
+    // Create utang_transactions table
+    await db.execute('''
+      CREATE TABLE utang_transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        customer_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        type TEXT NOT NULL,
+        notes TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_utang_customer_id ON utang_transactions(customer_id)');
+    await db.execute('CREATE INDEX idx_utang_created_at ON utang_transactions(created_at)');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -161,6 +188,34 @@ class DatabaseHelper {
         )
       ''');
       await db.execute('CREATE INDEX idx_expenses_created_at ON expenses(created_at)');
+    }
+    if (oldVersion < 8) {
+      // Create customers table
+      await db.execute('''
+        CREATE TABLE customers (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          contact TEXT,
+          address TEXT,
+          credit_limit REAL DEFAULT 0,
+          current_balance REAL DEFAULT 0
+        )
+      ''');
+
+      // Create utang_transactions table
+      await db.execute('''
+        CREATE TABLE utang_transactions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          customer_id INTEGER NOT NULL,
+          amount REAL NOT NULL,
+          type TEXT NOT NULL,
+          notes TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+        )
+      ''');
+      await db.execute('CREATE INDEX idx_utang_customer_id ON utang_transactions(customer_id)');
+      await db.execute('CREATE INDEX idx_utang_created_at ON utang_transactions(created_at)');
     }
   }
 
@@ -410,5 +465,88 @@ class DatabaseHelper {
       [startDate, endDate],
     );
     return result.first['total'] as double? ?? 0.0;
+  }
+
+  // Customer CRUD operations
+  Future<int> createCustomer(Map<String, dynamic> customer) async {
+    final db = await instance.database;
+    return await db.insert('customers', customer);
+  }
+
+  Future<List<Map<String, dynamic>>> getAllCustomers() async {
+    final db = await instance.database;
+    final result = await db.query('customers', orderBy: 'name ASC');
+    return result;
+  }
+
+  Future<Map<String, dynamic>?> getCustomer(int id) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'customers',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isEmpty) return null;
+    return maps.first;
+  }
+
+  Future<int> updateCustomer(int id, Map<String, dynamic> customer) async {
+    final db = await instance.database;
+    return await db.update(
+      'customers',
+      customer,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> deleteCustomer(int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'customers',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> updateCustomerBalance(int customerId, double newBalance) async {
+    final db = await instance.database;
+    return await db.update(
+      'customers',
+      {'current_balance': newBalance},
+      where: 'id = ?',
+      whereArgs: [customerId],
+    );
+  }
+
+  // Utang Transaction CRUD operations
+  Future<int> createUtangTransaction(Map<String, dynamic> transaction) async {
+    final db = await instance.database;
+    return await db.insert('utang_transactions', transaction);
+  }
+
+  Future<List<Map<String, dynamic>>> getUtangTransactionsByCustomerId(int customerId) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'utang_transactions',
+      where: 'customer_id = ?',
+      whereArgs: [customerId],
+      orderBy: 'created_at DESC',
+    );
+    return result;
+  }
+
+  Future<List<Map<String, dynamic>>> getAllUtangTransactions() async {
+    final db = await instance.database;
+    final result = await db.query('utang_transactions', orderBy: 'created_at DESC');
+    return result;
+  }
+
+  Future<double> getCustomerBalance(int customerId) async {
+    final db = await instance.database;
+    final customer = await getCustomer(customerId);
+    if (customer == null) return 0.0;
+    return customer['current_balance'] as double? ?? 0.0;
   }
 }

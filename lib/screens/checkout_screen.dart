@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/sale_provider.dart';
+import '../providers/customer_provider.dart';
+import '../providers/utang_transaction_provider.dart';
+import '../models/customer.dart';
+import '../models/utang_transaction.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final Map<int, int> cart;
@@ -14,12 +18,17 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _cashController = TextEditingController();
-  
+  Customer? _selectedCustomer;
+  bool _isUtang = false;
+
   @override
   void initState() {
     super.initState();
     _cashController.addListener(() {
       setState(() {}); // Rebuild to update sukli calculation
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CustomerProvider>().loadCustomers();
     });
   }
 
@@ -54,7 +63,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    if (_isUtang && _selectedCustomer == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pumili ng customer para sa utang')),
+      );
+      return;
+    }
+
     final saleProvider = context.read<SaleProvider>();
+    final utangProvider = context.read<UtangTransactionProvider>();
+    final customerProvider = context.read<CustomerProvider>();
     bool allSuccess = true;
 
     // Calculate total cash paid and change
@@ -68,8 +86,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           entry.key,
           entry.value,
           product.sellPrice,
-          amountPaid: cashPaid,
-          changeGiven: changeGiven,
+          amountPaid: _isUtang ? 0 : cashPaid,
+          changeGiven: _isUtang ? 0 : changeGiven,
         );
         if (!success) {
           allSuccess = false;
@@ -77,12 +95,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
     }
 
+    // Create utang transaction if enabled
+    if (_isUtang && _selectedCustomer != null && allSuccess) {
+      final transaction = UtangTransaction(
+        customerId: _selectedCustomer!.id!,
+        amount: _total,
+        type: 'credit',
+        notes: 'Benta ng ${DateTime.now().toIso8601String()}',
+        createdAt: DateTime.now().toIso8601String(),
+      );
+      await utangProvider.addUtangTransaction(transaction);
+    }
+
     if (allSuccess && mounted) {
       // Refresh product list to update stock in Inventory tab
       context.read<ProductProvider>().loadProducts();
+      // Refresh customer list to update balance
+      if (_isUtang) {
+        await customerProvider.loadCustomers();
+      }
       Navigator.pop(context, true);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Naitala na ang benta!')),
+        SnackBar(content: Text(_isUtang ? 'Naitala na ang utang!' : 'Naitala na ang benta!')),
       );
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -294,49 +328,108 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _cashController,
-                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      // Utang toggle
+                      Consumer<CustomerProvider>(
+                        builder: (context, customerProvider, child) {
+                          return SwitchListTile(
+                            title: const Text('Utang (Credit)'),
+                            subtitle: const Text('I-record ang benta bilang utang'),
+                            value: _isUtang,
+                            onChanged: (value) {
+                              setState(() {
+                                _isUtang = value;
+                                if (!value) {
+                                  _selectedCustomer = null;
+                                }
+                              });
+                            },
+                          );
+                        },
+                      ),
+                      // Customer selector (only shown when utang is enabled)
+                      if (_isUtang)
+                        Consumer<CustomerProvider>(
+                          builder: (context, customerProvider, child) {
+                            return DropdownButtonFormField<Customer>(
+                              value: _selectedCustomer,
                               decoration: const InputDecoration(
-                                labelText: 'Bayad (₱)',
+                                labelText: 'Pumili ng Customer',
                                 border: OutlineInputBorder(),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          SizedBox(
-                            width: 100,
-                            child: TextField(
-                              enabled: false,
-                              decoration: InputDecoration(
-                                labelText: 'Sukli',
-                                border: const OutlineInputBorder(),
-                                errorText: _change < 0 ? 'Kulang' : null,
-                              ),
-                              controller: TextEditingController.fromValue(
-                                TextEditingValue(
-                                  text: _change.toStringAsFixed(2),
-                                  selection: TextSelection.collapsed(offset: _change.toStringAsFixed(2).length),
+                              items: customerProvider.customers.map((customer) {
+                                return DropdownMenuItem<Customer>(
+                                  value: customer,
+                                  child: Row(
+                                    children: [
+                                      Text(customer.name),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '(₱${customer.currentBalance.toStringAsFixed(2)})',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: customer.currentBalance > 0 ? Colors.orange : Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedCustomer = value;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      // Payment fields (only shown when utang is disabled)
+                      if (!_isUtang) ...[
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _cashController,
+                                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                decoration: const InputDecoration(
+                                  labelText: 'Bayad (₱)',
+                                  border: OutlineInputBorder(),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(width: 16),
+                            SizedBox(
+                              width: 100,
+                              child: TextField(
+                                enabled: false,
+                                decoration: InputDecoration(
+                                  labelText: 'Sukli',
+                                  border: const OutlineInputBorder(),
+                                  errorText: _change < 0 ? 'Kulang' : null,
+                                ),
+                                controller: TextEditingController.fromValue(
+                                  TextEditingValue(
+                                    text: _change.toStringAsFixed(2),
+                                    selection: TextSelection.collapsed(offset: _change.toStringAsFixed(2).length),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _change < 0 ? null : _completeSale,
+                          onPressed: (_isUtang && _selectedCustomer == null) || (!_isUtang && _change < 0) ? null : _completeSale,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: _isUtang ? Colors.orange : null,
                           ),
-                          child: const Text(
-                            'I-complete ang Benta',
-                            style: TextStyle(fontSize: 16),
+                          child: Text(
+                            _isUtang ? 'I-record ang Utang' : 'I-complete ang Benta',
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ),
                       ),

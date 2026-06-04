@@ -7,6 +7,7 @@ import 'refund_screen.dart';
 import 'resell_screen.dart';
 import 'sales_history_screen.dart';
 import 'expense_screen.dart';
+import 'customer_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -114,6 +115,12 @@ class ReportsScreen extends StatelessWidget {
                     const TextSpan(text: 'Dito mo matutunton ang lahat ng gastusin ng negosyo tulad ng utilities, supplies, at iba pa. Makakatulong ito sa '),
                     const TextSpan(text: 'tumpak na kalkulasyon ng tunay na kita', style: TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: ' (sales minus expenses).\n\n'),
+                    const TextSpan(text: '6. Customers Tab: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: 'Dito mo makikita ang listahan ng iyong mga regular na customer. Maaari mong itakda ang '),
+                    const TextSpan(text: 'credit limit', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: ' bawat customer at matunton ang kanilang '),
+                    const TextSpan(text: 'utang (credit)', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: ' at mga bayad. Sa checkout, pwede mong i-toggle ang "Utang" para irecord ang benta bilang utang.\n\n'),
                     const TextSpan(text: 'Paalala: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
                     const TextSpan(text: 'Awtomatikong nag-a-update ang mga data na ito sa tuwing may nakukumpletong transaksyon sa Sell o Re-Sell tab.'),
                   ],
@@ -184,7 +191,7 @@ class ReportsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Ulat'),
@@ -220,6 +227,7 @@ class ReportsScreen extends StatelessWidget {
               Tab(text: 'Refunds'),
               Tab(text: 'Sales History'),
               Tab(text: 'Expenses'),
+              Tab(text: 'Customers'),
             ],
           ),
         ),
@@ -230,6 +238,7 @@ class ReportsScreen extends StatelessWidget {
             RefundScreen(),
             SalesHistoryScreen(),
             ExpenseScreen(),
+            CustomerScreen(),
           ],
         ),
       ),
