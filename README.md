@@ -5,8 +5,8 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 ## Features
 
 ### Core Functionality
-- **Product Catalog**: Add, edit, and delete products with name, quantity, buying price, selling price, reorder level, and optional product photos
-- **Quick Sale Screen**: Fast point-of-sale interface with product tiles in a grid layout, cart functionality, and automatic stock deduction
+- **Product Catalog**: Add, edit, and delete products with name, quantity, buying price, selling price, reorder level, optional product photos, and barcode for quick scanning
+- **Quick Sale Screen**: Fast point-of-sale interface with product tiles in a grid layout, cart functionality, automatic stock deduction, and barcode scanning
 - **Quantity Picker**: Select multiple units when adding products to cart in Sell and Re-Sell tabs
 - **Partial Removal**: Remove specific quantities from cart instead of all items
 - **Refund Management**: Process refunds with quantity selection and reason tracking
@@ -14,6 +14,7 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 - **Utang/Credit Tracking**: Track customer credits (utang) with customer management, credit limits, payment recording, and checkout integration
 - **Expense Tracking**: Record business expenses (utilities, supplies, rent, salary, etc.) with category-based organization
 - **Local Backup/Restore**: Export database to JSON file for data safety and restore from backup when switching devices or recovering data
+- **Barcode Scanning**: Scan product barcodes using camera for quick product lookup and automatic cart addition
 - **Low-Stock Alerts**: Automatic notifications when products fall below their reorder level (both on app start and after each sale)
 - **Profit Summary Chart**: Visual profit analysis with daily (last 7 days) and weekly (last 4 weeks) views using fl_chart (profit = sales - expenses)
 - **Supplier Management**: Track suppliers with contact information and last restock dates
@@ -281,12 +282,21 @@ flutter test
 ### Backup and Restore Data
 1. Navigate to the **Reports** tab
 2. Select the **Backup/Restore** tab
-3. To backup: Tap the **I-backup** button to export your database to a JSON file
+3. To backup: Tap the **I-share** button to export your database to a JSON file, or **I-copy** to copy to clipboard
 4. Share the backup file to a safe location (Google Drive, USB, email, etc.)
-5. To restore: Tap the **I-restore** button and select a backup JSON file
+5. To restore: Tap the **I-restore** button and paste the JSON content from your backup file
 6. Choose between **Replace** (deletes all existing data and restores from backup) or **Merge** (combines backup with existing data)
 7. Wait for the restore process to complete
 8. The app will display a success message when done
+
+### Using Barcode Scanning
+1. Navigate to the **Sell** tab
+2. Tap the **barcode scanner icon** (QR code icon) in the app bar
+3. Point your camera at a product barcode
+4. The app will automatically detect the barcode and add the product to your cart
+5. You can still adjust the quantity in the quantity picker dialog
+6. If the barcode is not found in your product list, you'll see an error message
+7. To add a barcode to a product: Navigate to **Inventory** → Edit product → Enter the barcode in the Barcode field
 
 ## Project Structure
 
@@ -322,7 +332,7 @@ lib/
 │   ├── home_screen.dart          # Main screen with bottom navigation
 │   ├── product_catalog_screen.dart
 │   ├── product_form_screen.dart
-│   ├── quick_sale_screen.dart    # Sell tab with quantity picker
+│   ├── quick_sale_screen.dart    # Sell tab with quantity picker and barcode scanning
 │   ├── checkout_screen.dart      # Cart screen with partial removal and utang support
 │   ├── resell_screen.dart        # Re-Sell tab for refunded products
 │   ├── resell_checkout_screen.dart # Re-Sell cart checkout
@@ -332,6 +342,7 @@ lib/
 │   ├── customer_screen.dart      # Customer management screen
 │   ├── utang_payment_screen.dart # Utang payment recording screen
 │   ├── backup_restore_screen.dart # Backup and restore screen
+│   ├── barcode_scanner_screen.dart # Barcode scanning screen
 │   ├── profit_chart_screen.dart
 │   ├── supplier_list_screen.dart
 │   └── supplier_form_screen.dart

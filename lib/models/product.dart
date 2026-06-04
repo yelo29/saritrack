@@ -8,6 +8,7 @@ class Product {
   final int reorderLevel;
   final String? photoPath;
   final int? supplierId;
+  final String? barcode;
 
   Product({
     this.id,
@@ -19,6 +20,7 @@ class Product {
     required this.reorderLevel,
     this.photoPath,
     this.supplierId,
+    this.barcode,
   });
 
   // Convert to map for database
@@ -33,6 +35,7 @@ class Product {
       'reorder_level': reorderLevel,
       'photo_path': photoPath,
       'supplier_id': supplierId,
+      'barcode': barcode,
     };
   }
 
@@ -48,6 +51,7 @@ class Product {
       reorderLevel: map['reorder_level'] as int,
       photoPath: map['photo_path'] as String?,
       supplierId: map['supplier_id'] as int?,
+      barcode: map['barcode'] as String?,
     );
   }
 
@@ -62,6 +66,7 @@ class Product {
     int? reorderLevel,
     String? photoPath,
     int? supplierId,
+    String? barcode,
   }) {
     return Product(
       id: id ?? this.id,
@@ -73,6 +78,7 @@ class Product {
       reorderLevel: reorderLevel ?? this.reorderLevel,
       photoPath: photoPath ?? this.photoPath,
       supplierId: supplierId ?? this.supplierId,
+      barcode: barcode ?? this.barcode,
     );
   }
 

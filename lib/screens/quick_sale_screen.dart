@@ -5,6 +5,7 @@ import '../providers/product_provider.dart';
 import '../providers/sale_provider.dart';
 import '../models/product.dart';
 import 'checkout_screen.dart';
+import 'barcode_scanner_screen.dart';
 
 class QuickSaleScreen extends StatefulWidget {
   const QuickSaleScreen({super.key});
@@ -142,6 +143,34 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
     }
   }
 
+  Future<void> _scanBarcode() async {
+    final scannedBarcode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const BarcodeScannerScreen(),
+      ),
+    );
+
+    if (scannedBarcode != null && mounted) {
+      final productProvider = context.read<ProductProvider>();
+      final product = productProvider.products.firstWhere(
+        (p) => p.barcode == scannedBarcode,
+        orElse: () => productProvider.products.firstWhere(
+          (p) => p.barcode != null && p.barcode == scannedBarcode,
+          orElse: () => productProvider.products.first,
+        ),
+      );
+
+      if (product.barcode == scannedBarcode) {
+        _addToCart(product);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Walang product na may barcode na ito')),
+        );
+      }
+    }
+  }
+
   // Tutorial Dialog para sa Sell Tab
   void _showHelpDialog() {
     showDialog(
@@ -225,6 +254,11 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
           },
         ),
         actions: [
+          IconButton(
+            onPressed: _scanBarcode,
+            icon: const Icon(Icons.qr_code_scanner),
+            tooltip: 'Scan Barcode',
+          ),
           IconButton(
             onPressed: () {
               _searchController.clear();

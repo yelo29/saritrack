@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 8,
+      version: 9,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -43,6 +43,7 @@ class DatabaseHelper {
         reorder_level INTEGER NOT NULL DEFAULT 5,
         photo_path TEXT,
         supplier_id INTEGER,
+        barcode TEXT,
         FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL
       )
     ''');
@@ -216,6 +217,10 @@ class DatabaseHelper {
       ''');
       await db.execute('CREATE INDEX idx_utang_customer_id ON utang_transactions(customer_id)');
       await db.execute('CREATE INDEX idx_utang_created_at ON utang_transactions(created_at)');
+    }
+    if (oldVersion < 9) {
+      // Add barcode column to products table
+      await db.execute('ALTER TABLE products ADD COLUMN barcode TEXT');
     }
   }
 

@@ -5,6 +5,7 @@ import '../providers/product_provider.dart';
 import '../providers/supplier_provider.dart';
 import '../models/product.dart';
 import '../services/image_service.dart';
+import 'barcode_scanner_screen.dart';
 
 class ProductFormScreen extends StatefulWidget {
   final Product? product;
@@ -24,6 +25,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _sellPriceController = TextEditingController();
   final _reorderLevelController = TextEditingController();
   final _supplierController = TextEditingController();
+  final _barcodeController = TextEditingController();
   String? _photoPath;
   int? _selectedSupplierId;
 
@@ -40,6 +42,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _photoPath = widget.product!.photoPath;
       _selectedSupplierId = widget.product!.supplierId;
       _supplierController.text = widget.product!.supplierId?.toString() ?? '';
+      _barcodeController.text = widget.product!.barcode ?? '';
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SupplierProvider>().loadSuppliers();
@@ -55,6 +58,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _sellPriceController.dispose();
     _reorderLevelController.dispose();
     _supplierController.dispose();
+    _barcodeController.dispose();
     super.dispose();
   }
 
@@ -63,6 +67,21 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     if (path != null) {
       setState(() {
         _photoPath = path;
+      });
+    }
+  }
+
+  Future<void> _scanBarcode() async {
+    final scannedBarcode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const BarcodeScannerScreen(),
+      ),
+    );
+
+    if (scannedBarcode != null && mounted) {
+      setState(() {
+        _barcodeController.text = scannedBarcode;
       });
     }
   }
@@ -84,6 +103,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       reorderLevel: int.parse(_reorderLevelController.text),
       photoPath: _photoPath,
       supplierId: _selectedSupplierId,
+      barcode: _barcodeController.text.trim().isEmpty ? null : _barcodeController.text.trim(),
     );
 
     bool success;
@@ -269,6 +289,27 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _barcodeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Barcode (Optional)',
+                        border: OutlineInputBorder(),
+                        helperText: 'I-scan o i-type ang barcode para mabilis na paghanap',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    onPressed: _scanBarcode,
+                    icon: const Icon(Icons.qr_code_scanner),
+                    tooltip: 'Scan Barcode',
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Consumer<SupplierProvider>(
