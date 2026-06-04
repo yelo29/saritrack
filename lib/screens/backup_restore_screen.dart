@@ -385,7 +385,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 6),
             // Info Section
             Container(
               padding: const EdgeInsets.all(16),
@@ -400,7 +400,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                   Row(
                     children: [
                       Icon(Icons.info_outline, color: Colors.blue[700]),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       const Text(
                         'Impormasyon',
                         style: TextStyle(
@@ -410,14 +410,14 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   const Text(
                     '• Ang backup ay naglalaman ng lahat ng data (products, sales, customers, expenses, etc.)\n'
                     '• Para mag-backup: Pindutin ang "I-share" para i-save sa Drive/Email, o "I-copy" para kopyahin sa clipboard\n'
                     '• Para mag-restore: Kopyahin ang JSON content ng backup file at i-paste sa restore dialog\n'
                     '• Replace: Burahin ang lahat ng existing data at ilagay ang backup (gamitin kapag nagbago ng device)\n'
                     '• Merge: Pagsamahin ang backup sa existing data (gamitin para idagdag lang data)',
-                    style: TextStyle(fontSize: 12, color: Colors.black87),
+                    style: TextStyle(fontSize: 9, color: Colors.black87),
                   ),
                 ],
               ),
