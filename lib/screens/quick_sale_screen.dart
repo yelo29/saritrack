@@ -264,7 +264,21 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
 
           final filteredProducts = productProvider.products
               .where((p) => p.name.toLowerCase().contains(_searchQuery))
-              .toList();
+              .toList()
+            ..sort((a, b) {
+              // Products with expiration dates come first
+              if (a.expirationDate != null && b.expirationDate == null) {
+                return -1;
+              }
+              if (a.expirationDate == null && b.expirationDate != null) {
+                return 1;
+              }
+              if (a.expirationDate != null && b.expirationDate != null) {
+                // Sort by expiration date (soonest first)
+                return DateTime.parse(a.expirationDate!).compareTo(DateTime.parse(b.expirationDate!));
+              }
+              return 0;
+            });
 
           if (filteredProducts.isEmpty) {
             return Center(
@@ -392,6 +406,42 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                               : FontWeight.normal,
                         ),
                       ),
+                      if (product.isExpired)
+                        const SizedBox(height: 4),
+                      if (product.isExpired)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text(
+                            'EXPIRED',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      if (product.isExpiringSoon && !product.isExpired)
+                        const SizedBox(height: 4),
+                      if (product.isExpiringSoon && !product.isExpired)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text(
+                            'EXPIRING SOON',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       if (inCart > 0)
                         const SizedBox(height: 4),
                       if (inCart > 0)

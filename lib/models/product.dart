@@ -8,6 +8,7 @@ class Product {
   final int reorderLevel;
   final String? photoPath;
   final int? supplierId;
+  final String? expirationDate;
 
   Product({
     this.id,
@@ -19,6 +20,7 @@ class Product {
     required this.reorderLevel,
     this.photoPath,
     this.supplierId,
+    this.expirationDate,
   });
 
   // Convert to map for database
@@ -33,6 +35,7 @@ class Product {
       'reorder_level': reorderLevel,
       'photo_path': photoPath,
       'supplier_id': supplierId,
+      'expiration_date': expirationDate,
     };
   }
 
@@ -48,6 +51,7 @@ class Product {
       reorderLevel: map['reorder_level'] as int,
       photoPath: map['photo_path'] as String?,
       supplierId: map['supplier_id'] as int?,
+      expirationDate: map['expiration_date'] as String?,
     );
   }
 
@@ -62,6 +66,7 @@ class Product {
     int? reorderLevel,
     String? photoPath,
     int? supplierId,
+    String? expirationDate,
   }) {
     return Product(
       id: id ?? this.id,
@@ -73,11 +78,27 @@ class Product {
       reorderLevel: reorderLevel ?? this.reorderLevel,
       photoPath: photoPath ?? this.photoPath,
       supplierId: supplierId ?? this.supplierId,
+      expirationDate: expirationDate ?? this.expirationDate,
     );
   }
 
   // Check if stock is low
   bool get isLowStock {
     return quantity <= reorderLevel;
+  }
+
+  // Check if product is expired
+  bool get isExpired {
+    if (expirationDate == null) return false;
+    final expDate = DateTime.parse(expirationDate!);
+    return expDate.isBefore(DateTime.now());
+  }
+
+  // Check if product is expiring soon (within 7 days)
+  bool get isExpiringSoon {
+    if (expirationDate == null) return false;
+    final expDate = DateTime.parse(expirationDate!);
+    final daysUntilExpiry = expDate.difference(DateTime.now()).inDays;
+    return daysUntilExpiry >= 0 && daysUntilExpiry <= 7;
   }
 }

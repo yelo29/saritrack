@@ -26,6 +26,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _supplierController = TextEditingController();
   String? _photoPath;
   int? _selectedSupplierId;
+  DateTime? _expirationDate;
 
   @override
   void initState() {
@@ -40,6 +41,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _photoPath = widget.product!.photoPath;
       _selectedSupplierId = widget.product!.supplierId;
       _supplierController.text = widget.product!.supplierId?.toString() ?? '';
+      if (widget.product!.expirationDate != null) {
+        _expirationDate = DateTime.parse(widget.product!.expirationDate!);
+      }
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SupplierProvider>().loadSuppliers();
@@ -84,6 +88,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       reorderLevel: int.parse(_reorderLevelController.text),
       photoPath: _photoPath,
       supplierId: _selectedSupplierId,
+      expirationDate: _expirationDate?.toIso8601String(),
     );
 
     bool success;
@@ -269,6 +274,34 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+              InkWell(
+                onTap: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: _expirationDate ?? DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 3650)),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      _expirationDate = pickedDate;
+                    });
+                  }
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Expiration Date (Optional)',
+                    border: OutlineInputBorder(),
+                    helperText: 'Para sa mga perishable items',
+                  ),
+                  child: Text(
+                    _expirationDate == null
+                        ? 'Pumili ng expiration date'
+                        : '${_expirationDate!.year}-${_expirationDate!.month.toString().padLeft(2, '0')}-${_expirationDate!.day.toString().padLeft(2, '0')}',
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               Consumer<SupplierProvider>(

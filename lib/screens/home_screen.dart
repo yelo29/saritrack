@@ -9,6 +9,7 @@ import 'sales_history_screen.dart';
 import 'expense_screen.dart';
 import 'customer_screen.dart';
 import 'backup_restore_screen.dart';
+import 'expiring_products_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -86,6 +87,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     'Sales History',
     'Expenses',
     'Customers',
+    'Expiring Products',
     'Backup/Restore',
   ];
 
@@ -96,6 +98,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     const SalesHistoryScreen(),
     const ExpenseScreen(),
     const CustomerScreen(),
+    const ExpiringProductsScreen(),
     const BackupRestoreScreen(),
   ];
 
@@ -156,7 +159,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     const TextSpan(text: ' bawat customer at matunton ang kanilang '),
                     const TextSpan(text: 'utang (credit)', style: TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: ' at mga bayad. Sa checkout, pwede mong i-toggle ang "Utang" para irecord ang benta bilang utang.\n\n'),
-                    const TextSpan(text: '7. Backup/Restore Tab: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: '7. Expiring Products Tab: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: 'Dito mo makikita ang listahan ng mga products na '),
+                    const TextSpan(text: 'a-expire na', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: ' o na-expire na. Nakakatulong ito upang maibenta muna ang mga items na malapit na mag-expire para hindi masayang. Ang mga products na '),
+                    const TextSpan(text: 'expiring soon', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+                    const TextSpan(text: ' (sa loob ng 7 araw) ay may orange badge, habang ang mga '),
+                    const TextSpan(text: 'expired', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                    const TextSpan(text: ' ay may red badge.\n\n'),
+                    const TextSpan(text: '8. Backup/Restore Tab: ', style: TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: 'Dito mo pwedeng i-backup ang iyong database sa JSON file para sa '),
                     const TextSpan(text: 'data safety', style: TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: '. Maaari mo ring i-restore ang data mula sa backup file kapag nagbago ng device o nawala ang data. Pumili sa pagitan ng '),

@@ -5,8 +5,8 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 ## Features
 
 ### Core Functionality
-- **Product Catalog**: Add, edit, and delete products with name, quantity, buying price, selling price, reorder level, and optional product photos
-- **Quick Sale Screen**: Fast point-of-sale interface with product tiles in a grid layout, cart functionality, and automatic stock deduction
+- **Product Catalog**: Add, edit, and delete products with name, quantity, buying price, selling price, reorder level, optional product photos, and expiration date tracking
+- **Quick Sale Screen**: Fast point-of-sale interface with product tiles in a grid layout, cart functionality, automatic stock deduction, and expiration status indicators
 - **Quantity Picker**: Select multiple units when adding products to cart in Sell and Re-Sell tabs
 - **Partial Removal**: Remove specific quantities from cart instead of all items
 - **Refund Management**: Process refunds with quantity selection and reason tracking
@@ -14,6 +14,7 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 - **Utang/Credit Tracking**: Track customer credits (utang) with customer management, credit limits, payment recording, and checkout integration
 - **Expense Tracking**: Record business expenses (utilities, supplies, rent, salary, etc.) with category-based organization
 - **Local Backup/Restore**: Export database to JSON file for data safety and restore from backup when switching devices or recovering data
+- **Expiration Date Tracking**: Track product expiration dates with visual indicators (expiring soon/expired) and dedicated expiring products report
 - **Low-Stock Alerts**: Automatic notifications when products fall below their reorder level (both on app start and after each sale)
 - **Profit Summary Chart**: Visual profit analysis with daily (last 7 days) and weekly (last 4 weeks) views using fl_chart (profit = sales - expenses)
 - **Supplier Management**: Track suppliers with contact information and last restock dates
@@ -288,6 +289,17 @@ flutter test
 7. Wait for the restore process to complete
 8. The app will display a success message when done
 
+### Using Expiration Date Tracking
+1. Navigate to **Inventory** → Add/Edit product
+2. Tap on the **Expiration Date** field to select a date from the date picker
+3. This is optional - only for perishable items (canned goods, snacks, beverages, etc.)
+4. Products with expiration dates will show status indicators in the Sell tab:
+   - **Orange badge**: Expiring soon (within 7 days)
+   - **Red badge**: Expired
+5. Navigate to **Reports** → **Expiring Products** tab to see all products with expiration dates
+6. Products are sorted by expiration date (soonest first)
+7. This helps you prioritize selling items that will expire soon to reduce waste
+
 ## Project Structure
 
 ```
@@ -332,6 +344,7 @@ lib/
 │   ├── customer_screen.dart      # Customer management screen
 │   ├── utang_payment_screen.dart # Utang payment recording screen
 │   ├── backup_restore_screen.dart # Backup and restore screen
+│   ├── expiring_products_screen.dart # Expiration date tracking screen
 │   ├── profit_chart_screen.dart
 │   ├── supplier_list_screen.dart
 │   └── supplier_form_screen.dart
