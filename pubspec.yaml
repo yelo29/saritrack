@@ -44,6 +44,10 @@ dependencies:
   # Date formatting
   intl: ^0.18.1
   
+  # CSV/PDF Export
+  csv: ^5.1.1
+  pdf: ^3.10.7
+  
   # Splash screen
   flutter_native_splash: ^2.3.9
 

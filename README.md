@@ -5,17 +5,18 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 ## Features
 
 ### Core Functionality
-- **Product Catalog**: Add, edit, and delete products with name, quantity, buying price, selling price, reorder level, optional product photos, expiration date tracking, and barcode for quick scanning
+- **Product Catalog**: Add, edit, and delete products with name, quantity, buying price, selling price, reorder level, optional product photos, expiration date tracking, barcode for quick scanning, and CSV/PDF export
 - **Quick Sale Screen**: Fast point-of-sale interface with product tiles in a grid layout, cart functionality, automatic stock deduction, expiration status indicators, and barcode scanning
 - **Quantity Picker**: Select multiple units when adding products to cart in Sell and Re-Sell tabs
 - **Partial Removal**: Remove specific quantities from cart instead of all items
 - **Refund Management**: Process refunds with quantity selection and reason tracking
 - **Re-Sell Feature**: Resell refunded products with dedicated cart and checkout flow
 - **Utang/Credit Tracking**: Track customer credits (utang) with customer management, credit limits, payment recording, and checkout integration
-- **Expense Tracking**: Record business expenses (utilities, supplies, rent, salary, etc.) with category-based organization
+- **Expense Tracking**: Record business expenses (utilities, supplies, rent, salary, etc.) with category-based organization and CSV/PDF export
 - **Local Backup/Restore**: Export database to JSON file for data safety and restore from backup when switching devices or recovering data
 - **Expiration Date Tracking**: Track product expiration dates with visual indicators (expiring soon/expired) and dedicated expiring products report
 - **Barcode Scanning**: Scan product barcodes using camera for quick product lookup and automatic cart addition
+- **CSV/PDF Export**: Export sales history, expenses, and inventory to CSV or PDF format for accounting and record-keeping
 - **Low-Stock Alerts**: Automatic notifications when products fall below their reorder level (both on app start and after each sale)
 - **Profit Summary Chart**: Visual profit analysis with daily (last 7 days) and weekly (last 4 weeks) views using fl_chart (profit = sales - expenses)
 - **Supplier Management**: Track suppliers with contact information and last restock dates
@@ -310,6 +311,16 @@ flutter test
 6. If the barcode is not found in your product list, you'll see an error message
 7. To add a barcode to a product: Navigate to **Inventory** → Edit product → Enter the barcode in the Barcode field or tap the scan button
 
+### Using CSV/PDF Export
+1. Navigate to **Inventory**, **Reports → Sales History**, or **Reports → Expenses**
+2. Tap the **menu icon** (three dots) in the app bar
+3. Select **Export as CSV** or **Export as PDF**
+4. The app will generate the file and open the share menu
+5. Choose how to share: email, messaging apps, save to device, etc.
+6. CSV files can be opened in Excel, Google Sheets, or any spreadsheet application
+7. PDF files can be opened in any PDF viewer or shared for record-keeping
+8. Export includes all current data (respects any filters you've applied)
+
 ## Project Structure
 
 ```
@@ -363,7 +374,8 @@ lib/
 │   ├── notification_service.dart # Low-stock notifications
 │   ├── image_service.dart         # Image picking and compression
 │   ├── seed_data_service.dart    # Sample data seeding
-│   └── backup_service.dart       # Database backup and restore
+│   ├── backup_service.dart       # Database backup and restore
+│   └── export_service.dart      # CSV/PDF export functionality
 └── main.dart                     # App entry point
 ```
 

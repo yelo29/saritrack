@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/expense_provider.dart';
 import '../models/expense.dart';
 import 'package:intl/intl.dart';
+import '../services/export_service.dart';
 
 class ExpenseScreen extends StatefulWidget {
   const ExpenseScreen({super.key});
@@ -36,6 +37,41 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
         title: const Text('Expenses'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          PopupMenuButton<String>(
+            onSelected: (String choice) async {
+              final expenseProvider = context.read<ExpenseProvider>();
+              
+              if (choice == 'csv') {
+                await ExportService.exportExpensesToCSV(expenseProvider.expenses);
+              } else if (choice == 'pdf') {
+                await ExportService.exportExpensesToPDF(expenseProvider.expenses);
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'csv',
+                  child: Row(
+                    children: [
+                      Icon(Icons.table_chart),
+                      SizedBox(width: 8),
+                      Text('Export as CSV'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'pdf',
+                  child: Row(
+                    children: [
+                      Icon(Icons.picture_as_pdf),
+                      SizedBox(width: 8),
+                      Text('Export as PDF'),
+                    ],
+                  ),
+                ),
+              ];
+            },
+          ),
           IconButton(
             onPressed: () {
               context.read<ExpenseProvider>().loadExpenses();

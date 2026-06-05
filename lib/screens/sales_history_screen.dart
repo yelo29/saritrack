@@ -4,6 +4,7 @@ import '../providers/sale_provider.dart';
 import '../providers/product_provider.dart';
 import '../models/sale.dart';
 import 'package:intl/intl.dart';
+import '../services/export_service.dart';
 
 class SalesHistoryScreen extends StatefulWidget {
   const SalesHistoryScreen({super.key});
@@ -139,6 +140,42 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
           ),
         ),
         actions: [
+          PopupMenuButton<String>(
+            onSelected: (String choice) async {
+              final saleProvider = context.read<SaleProvider>();
+              final filteredSales = _filterSales(saleProvider.sales, context.read<ProductProvider>());
+              
+              if (choice == 'csv') {
+                await ExportService.exportSalesToCSV(filteredSales);
+              } else if (choice == 'pdf') {
+                await ExportService.exportSalesToPDF(filteredSales);
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'csv',
+                  child: Row(
+                    children: [
+                      Icon(Icons.table_chart),
+                      SizedBox(width: 8),
+                      Text('Export as CSV'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'pdf',
+                  child: Row(
+                    children: [
+                      Icon(Icons.picture_as_pdf),
+                      SizedBox(width: 8),
+                      Text('Export as PDF'),
+                    ],
+                  ),
+                ),
+              ];
+            },
+          ),
           IconButton(
             onPressed: () {
               _searchController.clear();
