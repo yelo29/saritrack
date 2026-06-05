@@ -29,6 +29,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   String? _photoPath;
   int? _selectedSupplierId;
   DateTime? _expirationDate;
+  String? _discountType;
+  final _discountValueController = TextEditingController();
 
   @override
   void initState() {
@@ -47,6 +49,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         _expirationDate = DateTime.parse(widget.product!.expirationDate!);
       }
       _barcodeController.text = widget.product!.barcode ?? '';
+      _discountType = widget.product!.discountType;
+      _discountValueController.text = widget.product!.discountValue.toString();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SupplierProvider>().loadSuppliers();
@@ -63,6 +67,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _reorderLevelController.dispose();
     _supplierController.dispose();
     _barcodeController.dispose();
+    _discountValueController.dispose();
     super.dispose();
   }
 
@@ -109,6 +114,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       supplierId: _selectedSupplierId,
       expirationDate: _expirationDate?.toIso8601String(),
       barcode: _barcodeController.text.trim().isEmpty ? null : _barcodeController.text.trim(),
+      discountType: _discountType,
+      discountValue: _discountValueController.text.trim().isEmpty ? 0 : double.parse(_discountValueController.text.trim()),
     );
 
     bool success;
@@ -344,6 +351,53 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+              const Text(
+                'Discount (Optional)',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: _discountType,
+                decoration: const InputDecoration(
+                  labelText: 'Discount Type',
+                  border: OutlineInputBorder(),
+                  helperText: 'Piliin ang uri ng discount',
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: null,
+                    child: Text('Walang Discount'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'percentage',
+                    child: Text('Percentage (%)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'fixed',
+                    child: Text('Fixed Amount (₱)'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _discountType = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              if (_discountType != null)
+                TextFormField(
+                  controller: _discountValueController,
+                  decoration: InputDecoration(
+                    labelText: _discountType == 'percentage' ? 'Discount Percentage (%)' : 'Discount Amount (₱)',
+                    border: const OutlineInputBorder(),
+                    helperText: _discountType == 'percentage' 
+                        ? 'Halimbawa: 10 para sa 10% discount' 
+                        : 'Halimbawa: 5 para sa ₱5 discount',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              if (_discountType != null) const SizedBox(height: 16),
               const SizedBox(height: 16),
               Consumer<SupplierProvider>(
                 builder: (context, supplierProvider, child) {

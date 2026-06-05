@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 10,
+      version: 11,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -45,6 +45,8 @@ class DatabaseHelper {
         supplier_id INTEGER,
         expiration_date TEXT,
         barcode TEXT,
+        discount_type TEXT,
+        discount_value REAL DEFAULT 0,
         FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL
       )
     ''');
@@ -226,6 +228,11 @@ class DatabaseHelper {
     if (oldVersion < 10) {
       // Add barcode column to products table
       await db.execute('ALTER TABLE products ADD COLUMN barcode TEXT');
+    }
+    if (oldVersion < 11) {
+      // Add discount columns to products table
+      await db.execute('ALTER TABLE products ADD COLUMN discount_type TEXT');
+      await db.execute('ALTER TABLE products ADD COLUMN discount_value REAL DEFAULT 0');
     }
   }
 

@@ -421,13 +421,36 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      Text(
-                        '₱${product.sellPrice.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[700],
+                      if (product.hasDiscount)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '₱${product.discountedPrice.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '₱${product.sellPrice.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: Colors.grey[500],
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Text(
+                          '₱${product.sellPrice.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[700],
+                          ),
                         ),
-                      ),
                       Text(
                         'Stock: ${product.quantity}',
                         style: TextStyle(

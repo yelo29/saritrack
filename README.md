@@ -5,8 +5,8 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 ## Features
 
 ### Core Functionality
-- **Product Catalog**: Add, edit, and delete products with name, quantity, buying price, selling price, reorder level, optional product photos, expiration date tracking, barcode for quick scanning, and CSV/PDF export
-- **Quick Sale Screen**: Fast point-of-sale interface with product tiles in a grid layout, cart functionality, automatic stock deduction, expiration status indicators, and barcode scanning
+- **Product Catalog**: Add, edit, and delete products with name, quantity, buying price, selling price, reorder level, optional product photos, expiration date tracking, barcode for quick scanning, discount system, and CSV/PDF export
+- **Quick Sale Screen**: Fast point-of-sale interface with product tiles in a grid layout, cart functionality, automatic stock deduction, expiration status indicators, barcode scanning, and discount price display
 - **Quantity Picker**: Select multiple units when adding products to cart in Sell and Re-Sell tabs
 - **Partial Removal**: Remove specific quantities from cart instead of all items
 - **Refund Management**: Process refunds with quantity selection and reason tracking
@@ -16,7 +16,8 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 - **Local Backup/Restore**: Export database to JSON file for data safety and restore from backup when switching devices or recovering data
 - **Expiration Date Tracking**: Track product expiration dates with visual indicators (expiring soon/expired) and dedicated expiring products report
 - **Barcode Scanning**: Scan product barcodes using camera for quick product lookup and automatic cart addition
-- **CSV/PDF Export**: Export sales history, expenses, and inventory to CSV or PDF format for accounting and record-keeping
+- **CSV/PDF Export**: Export sales history, expenses, profit data, and inventory to CSV or PDF format for accounting and record-keeping
+- **Discount System**: Set percentage or fixed amount discounts on products for promotions and sales
 - **Low-Stock Alerts**: Automatic notifications when products fall below their reorder level (both on app start and after each sale)
 - **Profit Summary Chart**: Visual profit analysis with daily (last 7 days) and weekly (last 4 weeks) views using fl_chart (profit = sales - expenses)
 - **Supplier Management**: Track suppliers with contact information and last restock dates
@@ -312,7 +313,7 @@ flutter test
 7. To add a barcode to a product: Navigate to **Inventory** → Edit product → Enter the barcode in the Barcode field or tap the scan button
 
 ### Using CSV/PDF Export
-1. Navigate to **Inventory**, **Reports → Sales History**, or **Reports → Expenses**
+1. Navigate to **Inventory**, **Reports → Sales History**, **Reports → Expenses**, or **Reports → Profit Chart**
 2. Tap the **menu icon** (three dots) in the app bar
 3. Select **Export as CSV** or **Export as PDF**
 4. The app will generate the file and open the share menu
@@ -320,6 +321,21 @@ flutter test
 6. CSV files can be opened in Excel, Google Sheets, or any spreadsheet application
 7. PDF files can be opened in any PDF viewer or shared for record-keeping
 8. Export includes all current data (respects any filters you've applied)
+
+### Using Discount System
+1. Navigate to **Inventory** and tap the **+** button to add a new product or edit an existing one
+2. Scroll down to the **Discount (Optional)** section
+3. Select a discount type:
+   - **Walang Discount**: No discount applied
+   - **Percentage (%)**: Discount based on percentage (e.g., 10% off)
+   - **Fixed Amount (₱)**: Discount based on fixed amount (e.g., ₱5 off)
+4. Enter the discount value:
+   - For percentage: Enter the percentage (e.g., 10 for 10%)
+   - For fixed amount: Enter the amount in pesos (e.g., 5 for ₱5)
+5. Save the product
+6. The discounted price will be displayed in red with the original price struck through in the **Sell** tab
+7. During checkout, the discounted price will be automatically applied
+8. To remove a discount, edit the product and select "Walang Discount"
 
 ## Project Structure
 

@@ -44,7 +44,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     widget.cart.forEach((productId, quantity) {
       final product = productProvider.getProductById(productId);
       if (product != null) {
-        total += product.sellPrice * quantity;
+        total += product.discountedPrice * quantity;
       }
     });
     return total;

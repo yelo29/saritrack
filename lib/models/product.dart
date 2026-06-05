@@ -10,6 +10,8 @@ class Product {
   final int? supplierId;
   final String? expirationDate;
   final String? barcode;
+  final String? discountType; // 'percentage' or 'fixed'
+  final double discountValue;
 
   Product({
     this.id,
@@ -23,6 +25,8 @@ class Product {
     this.supplierId,
     this.expirationDate,
     this.barcode,
+    this.discountType,
+    this.discountValue = 0,
   });
 
   // Convert to map for database
@@ -39,6 +43,8 @@ class Product {
       'supplier_id': supplierId,
       'expiration_date': expirationDate,
       'barcode': barcode,
+      'discount_type': discountType,
+      'discount_value': discountValue,
     };
   }
 
@@ -56,6 +62,8 @@ class Product {
       supplierId: map['supplier_id'] as int?,
       expirationDate: map['expiration_date'] as String?,
       barcode: map['barcode'] as String?,
+      discountType: map['discount_type'] as String?,
+      discountValue: (map['discount_value'] as num?)?.toDouble() ?? 0,
     );
   }
 
@@ -72,6 +80,8 @@ class Product {
     int? supplierId,
     String? expirationDate,
     String? barcode,
+    String? discountType,
+    double? discountValue,
   }) {
     return Product(
       id: id ?? this.id,
@@ -85,6 +95,8 @@ class Product {
       supplierId: supplierId ?? this.supplierId,
       expirationDate: expirationDate ?? this.expirationDate,
       barcode: barcode ?? this.barcode,
+      discountType: discountType ?? this.discountType,
+      discountValue: discountValue ?? this.discountValue,
     );
   }
 
@@ -106,5 +118,28 @@ class Product {
     final expDate = DateTime.parse(expirationDate!);
     final daysUntilExpiry = expDate.difference(DateTime.now()).inDays;
     return daysUntilExpiry >= 0 && daysUntilExpiry <= 7;
+  }
+
+  // Check if product has a discount
+  bool get hasDiscount {
+    return discountType != null && discountValue > 0;
+  }
+
+  // Get the discounted price
+  double get discountedPrice {
+    if (!hasDiscount) return sellPrice;
+    
+    if (discountType == 'percentage') {
+      return sellPrice - (sellPrice * (discountValue / 100));
+    } else if (discountType == 'fixed') {
+      return sellPrice - discountValue;
+    }
+    
+    return sellPrice;
+  }
+
+  // Get the discount amount
+  double get discountAmount {
+    return sellPrice - discountedPrice;
   }
 }
