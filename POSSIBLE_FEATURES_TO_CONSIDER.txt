@@ -245,10 +245,10 @@ Tier 2: High Value
 Barcode Scanning ✅ COMPLETED - Speed and professionalism
 Receipt Printing - Customer expectations - CANT IMPLEMENT - LACK OF HARDWARE SUPPORT
 Expiration Date Tracking ✅ COMPLETED - Inventory management
+CSV/PDF Export ✅ COMPLETED - Accounting
 Tier 3: Nice-to-Have
 Discount System - Marketing
 Purchase Orders - Restocking workflow
-CSV/PDF Export - Accounting
 Product Variants - For specific product types
 Tier 4: Low Priority
 Employee Management - Only for multi-staff
