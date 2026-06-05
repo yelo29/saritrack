@@ -225,7 +225,7 @@ class SaleProvider with ChangeNotifier {
       final sale = Sale(
         productId: productId,
         qtySold: quantity,
-        total: quantity * sellPrice,
+        total: quantity * product.discountedPrice,
         createdAt: DateTime.now().toIso8601String(),
         isResold: true,
         amountPaid: amountPaid,
