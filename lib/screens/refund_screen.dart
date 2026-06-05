@@ -244,6 +244,15 @@ class _RefundScreenState extends State<RefundScreen> {
                 color: Colors.grey[700],
               ),
             ),
+            if (sale.hasDiscount)
+              Text(
+                'Discount: ${sale.discountType == 'percentage' ? '${sale.discountValue.toStringAsFixed(0)}%' : '₱${sale.discountValue.toStringAsFixed(2)}'} | Original: ₱${sale.originalPrice.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             Text(
               'Date: ${_formatDate(sale.createdAt)}',
               style: TextStyle(

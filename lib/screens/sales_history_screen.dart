@@ -359,6 +359,15 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(_formatDate(sale.createdAt)),
+                            if (sale.hasDiscount)
+                              Text(
+                                'Discount: ${sale.discountType == 'percentage' ? '${sale.discountValue.toStringAsFixed(0)}%' : '₱${sale.discountValue.toStringAsFixed(2)}'} | Original: ₱${sale.originalPrice.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             if (sale.amountPaid != null)
                               Text(
                                 'Paid: ₱${sale.amountPaid!.toStringAsFixed(2)} | Change: ₱${sale.changeGiven?.toStringAsFixed(2) ?? '0.00'}',

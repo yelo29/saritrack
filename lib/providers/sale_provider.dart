@@ -52,7 +52,7 @@ class SaleProvider with ChangeNotifier {
   }
 
   // Record a sale with stock deduction
-  Future<bool> recordSale(int productId, int quantity, double sellPrice, {double? amountPaid, double? changeGiven}) async {
+  Future<bool> recordSale(int productId, int quantity, double sellPrice, {double? amountPaid, double? changeGiven, String? discountType, double discountValue = 0, double? originalPrice}) async {
     try {
       // Get the product to verify stock
       final product = await _productRepository.getProductById(productId);
@@ -71,14 +71,21 @@ class SaleProvider with ChangeNotifier {
       // Deduct stock
       await _productRepository.deductStock(productId, quantity);
 
+      // Calculate total with discount
+      final discountedPrice = product.discountedPrice;
+      final totalPrice = quantity * discountedPrice;
+
       // Create sale record
       final sale = Sale(
         productId: productId,
         qtySold: quantity,
-        total: quantity * sellPrice,
+        total: totalPrice,
         createdAt: DateTime.now().toIso8601String(),
         amountPaid: amountPaid,
         changeGiven: changeGiven,
+        discountType: product.discountType,
+        discountValue: product.discountValue,
+        originalPrice: product.sellPrice,
       );
 
       await _repository.addSale(sale);
@@ -223,6 +230,9 @@ class SaleProvider with ChangeNotifier {
         isResold: true,
         amountPaid: amountPaid,
         changeGiven: changeGiven,
+        discountType: product.discountType,
+        discountValue: product.discountValue,
+        originalPrice: product.sellPrice,
       );
 
       await _repository.addSale(sale);

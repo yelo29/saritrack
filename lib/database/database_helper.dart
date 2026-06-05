@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 11,
+      version: 12,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -60,6 +60,11 @@ class DatabaseHelper {
         total REAL NOT NULL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         is_resold INTEGER NOT NULL DEFAULT 0,
+        amount_paid REAL,
+        change_given REAL,
+        discount_type TEXT,
+        discount_value REAL DEFAULT 0,
+        original_price REAL NOT NULL,
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
       )
     ''');
@@ -233,6 +238,12 @@ class DatabaseHelper {
       // Add discount columns to products table
       await db.execute('ALTER TABLE products ADD COLUMN discount_type TEXT');
       await db.execute('ALTER TABLE products ADD COLUMN discount_value REAL DEFAULT 0');
+    }
+    if (oldVersion < 12) {
+      // Add discount columns to sales table
+      await db.execute('ALTER TABLE sales ADD COLUMN discount_type TEXT');
+      await db.execute('ALTER TABLE sales ADD COLUMN discount_value REAL DEFAULT 0');
+      await db.execute('ALTER TABLE sales ADD COLUMN original_price REAL DEFAULT total');
     }
   }
 
