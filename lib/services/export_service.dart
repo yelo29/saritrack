@@ -33,15 +33,15 @@ class ExportService {
   }
 
   // Export sales to CSV
-  static Future<void> exportSalesToCSV(List<Sale> sales) async {
+  static Future<void> exportSalesToCSV(List<Sale> sales, Map<int, String> productNames) async {
     final List<List<dynamic>> rows = [
-      ['ID', 'Product ID', 'Quantity Sold', 'Total', 'Created At'],
+      ['ID', 'Product Name', 'Quantity Sold', 'Total', 'Created At'],
     ];
 
     for (var sale in sales) {
       rows.add([
         sale.id,
-        sale.productId,
+        productNames[sale.productId] ?? 'Unknown (ID: ${sale.productId})',
         sale.qtySold,
         sale.total,
         sale.createdAt,
@@ -148,7 +148,7 @@ class ExportService {
   }
 
   // Export sales to PDF
-  static Future<void> exportSalesToPDF(List<Sale> sales) async {
+  static Future<void> exportSalesToPDF(List<Sale> sales, Map<int, String> productNames) async {
     final pdf = pw.Document();
     
     pdf.addPage(
@@ -179,7 +179,7 @@ class ExportService {
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
-                        child: pw.Text('Product ID', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        child: pw.Text('Product Name', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
@@ -203,7 +203,7 @@ class ExportService {
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
-                        child: pw.Text(sale.productId.toString()),
+                        child: pw.Text(productNames[sale.productId] ?? 'Unknown (ID: ${sale.productId})'),
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
@@ -328,5 +328,86 @@ class ExportService {
     }
     
     await Share.shareXFiles([XFile(path)], text: 'Exported $filename');
+  }
+
+  // Export profit data to CSV
+  static Future<void> exportProfitToCSV(Map<String, double> profitData, bool isDailyView) async {
+    final List<List<dynamic>> rows = [
+      ['Period', 'Profit'],
+    ];
+
+    for (var entry in profitData.entries) {
+      rows.add([
+        entry.key,
+        entry.value,
+      ]);
+    }
+
+    final String csv = const ListToCsvConverter().convert(rows);
+    final filename = isDailyView ? 'profit_daily.csv' : 'profit_weekly.csv';
+    await _saveAndShareFile(csv, filename);
+  }
+
+  // Export profit data to PDF
+  static Future<void> exportProfitToPDF(Map<String, double> profitData, bool isDailyView) async {
+    final pdf = pw.Document();
+    
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('Profit Report', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 8),
+              pw.Text(isDailyView ? 'Last 7 Days' : 'Last 4 Weeks', style: pw.TextStyle(fontSize: 14)),
+              pw.SizedBox(height: 20),
+              pw.Table(
+                border: pw.TableBorder.all(),
+                columnWidths: {
+                  0: const pw.FlexColumnWidth(2),
+                  1: const pw.FlexColumnWidth(1),
+                },
+                children: [
+                  pw.TableRow(
+                    decoration: pw.BoxDecoration(color: PdfColors.grey300),
+                    children: [
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text('Period', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text('Profit', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                  ...profitData.entries.map((entry) => pw.TableRow(
+                    children: [
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text(entry.key),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text('₱${entry.value.toStringAsFixed(2)}'),
+                      ),
+                    ],
+                  )),
+                ],
+              ),
+              pw.SizedBox(height: 20),
+              pw.Text('Total Profit: ₱${profitData.values.fold(0.0, (sum, value) => sum + value).toStringAsFixed(2)}', 
+                style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+            ],
+          );
+        },
+      ),
+    );
+
+    final List<int> pdfBytes = await pdf.save();
+    final filename = isDailyView ? 'profit_daily.pdf' : 'profit_weekly.pdf';
+    await _saveAndShareFile(pdfBytes, filename);
   }
 }

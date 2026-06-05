@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/sale_provider.dart';
 import 'package:intl/intl.dart';
+import '../services/export_service.dart';
 
 class ProfitChartScreen extends StatefulWidget {
   const ProfitChartScreen({super.key});
@@ -76,6 +77,41 @@ class _ProfitChartScreenState extends State<ProfitChartScreen> {
       appBar: AppBar(
         title: const Text('Profit Summary'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (String choice) async {
+              if (choice == 'csv') {
+                await ExportService.exportProfitToCSV(_profitData, _isDailyView);
+              } else if (choice == 'pdf') {
+                await ExportService.exportProfitToPDF(_profitData, _isDailyView);
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'csv',
+                  child: Row(
+                    children: [
+                      Icon(Icons.table_chart),
+                      SizedBox(width: 8),
+                      Text('Export as CSV'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'pdf',
+                  child: Row(
+                    children: [
+                      Icon(Icons.picture_as_pdf),
+                      SizedBox(width: 8),
+                      Text('Export as PDF'),
+                    ],
+                  ),
+                ),
+              ];
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

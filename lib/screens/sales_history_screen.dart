@@ -143,12 +143,19 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
           PopupMenuButton<String>(
             onSelected: (String choice) async {
               final saleProvider = context.read<SaleProvider>();
-              final filteredSales = _filterSales(saleProvider.sales, context.read<ProductProvider>());
+              final productProvider = context.read<ProductProvider>();
+              final filteredSales = _filterSales(saleProvider.sales, productProvider);
+              
+              // Create a map of product IDs to names
+              final Map<int, String> productNames = {};
+              for (var product in productProvider.products) {
+                productNames[product.id!] = product.name;
+              }
               
               if (choice == 'csv') {
-                await ExportService.exportSalesToCSV(filteredSales);
+                await ExportService.exportSalesToCSV(filteredSales, productNames);
               } else if (choice == 'pdf') {
-                await ExportService.exportSalesToPDF(filteredSales);
+                await ExportService.exportSalesToPDF(filteredSales, productNames);
               }
             },
             itemBuilder: (BuildContext context) {
