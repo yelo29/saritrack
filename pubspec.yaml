@@ -38,6 +38,9 @@ dependencies:
   image_picker: ^1.0.5
   flutter_image_compress: ^2.1.0
   
+  # Barcode scanning
+  mobile_scanner: ^4.0.1
+  
   # Date formatting
   intl: ^0.18.1
   

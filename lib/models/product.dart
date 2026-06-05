@@ -9,6 +9,7 @@ class Product {
   final String? photoPath;
   final int? supplierId;
   final String? expirationDate;
+  final String? barcode;
 
   Product({
     this.id,
@@ -21,6 +22,7 @@ class Product {
     this.photoPath,
     this.supplierId,
     this.expirationDate,
+    this.barcode,
   });
 
   // Convert to map for database
@@ -36,6 +38,7 @@ class Product {
       'photo_path': photoPath,
       'supplier_id': supplierId,
       'expiration_date': expirationDate,
+      'barcode': barcode,
     };
   }
 
@@ -52,6 +55,7 @@ class Product {
       photoPath: map['photo_path'] as String?,
       supplierId: map['supplier_id'] as int?,
       expirationDate: map['expiration_date'] as String?,
+      barcode: map['barcode'] as String?,
     );
   }
 
@@ -67,6 +71,7 @@ class Product {
     String? photoPath,
     int? supplierId,
     String? expirationDate,
+    String? barcode,
   }) {
     return Product(
       id: id ?? this.id,
@@ -79,6 +84,7 @@ class Product {
       photoPath: photoPath ?? this.photoPath,
       supplierId: supplierId ?? this.supplierId,
       expirationDate: expirationDate ?? this.expirationDate,
+      barcode: barcode ?? this.barcode,
     );
   }
 

@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 9,
+      version: 10,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -44,6 +44,7 @@ class DatabaseHelper {
         photo_path TEXT,
         supplier_id INTEGER,
         expiration_date TEXT,
+        barcode TEXT,
         FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL
       )
     ''');
@@ -221,6 +222,10 @@ class DatabaseHelper {
     if (oldVersion < 9) {
       // Add expiration_date column to products table
       await db.execute('ALTER TABLE products ADD COLUMN expiration_date TEXT');
+    }
+    if (oldVersion < 10) {
+      // Add barcode column to products table
+      await db.execute('ALTER TABLE products ADD COLUMN barcode TEXT');
     }
   }
 
