@@ -31,7 +31,7 @@ CREATE TABLE utang_transactions (
 );
 Relevance: ⭐⭐⭐⭐⭐ HIGHEST - Utang system is core to Filipino sari-sari store culture
 
-2. Barcode Scanning
+2. Barcode Scanning ✅ COMPLETED
 How it works offline:
 
 Use camera to scan barcodes (local ML or barcode library)
@@ -102,7 +102,7 @@ CREATE TABLE expenses (
 );
 Relevance: ⭐⭐⭐⭐⭐ HIGHEST - Essential for accurate profit calculation
 
-6. Advanced Inventory (Expiration Dates)
+6. Advanced Inventory (Expiration Dates) ✅ COMPLETED
 How it works offline:
 
 Track expiration dates per batch
@@ -242,9 +242,9 @@ Utang/Credit Tracking ✅ COMPLETED - Unique to PH market, high demand
 Expense Tracking ✅ COMPLETED - Essential for accurate profit
 Local Backup/Restore ✅ COMPLETED - Data safety
 Tier 2: High Value
-Barcode Scanning - Speed and professionalism
+Barcode Scanning ✅ COMPLETED - Speed and professionalism
 Receipt Printing - Customer expectations
-Expiration Date Tracking - Inventory management
+Expiration Date Tracking ✅ COMPLETED - Inventory management
 Tier 3: Nice-to-Have
 Discount System - Marketing
 Purchase Orders - Restocking workflow
