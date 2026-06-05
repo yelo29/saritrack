@@ -248,7 +248,7 @@ Expiration Date Tracking ✅ COMPLETED - Inventory management
 CSV/PDF Export ✅ COMPLETED - Accounting
 Tier 3: Nice-to-Have
 Discount System ✅ COMPLETED - Marketing
-Purchase Orders - Restocking workflow
+Purchase Orders ✅ COMPLETED - Restocking workflow
 Product Variants - For specific product types
 Tier 4: Low Priority
 Employee Management - Only for multi-staff

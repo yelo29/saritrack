@@ -1,11 +1,15 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
 import '../database/database_helper.dart';
 import '../models/product.dart';
+import '../models/purchase_order.dart';
+import '../repositories/purchase_order_repository.dart';
 
 class NotificationService {
   static final NotificationService instance = NotificationService._init();
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  final PurchaseOrderRepository _purchaseOrderRepository = PurchaseOrderRepository();
 
   NotificationService._init();
 
@@ -85,6 +89,73 @@ class NotificationService {
       'Mababa na ang stock: $productNames',
       platformChannelSpecifics,
     );
+  }
+
+  // Schedule delivery notification for a purchase order
+  Future<int?> scheduleDeliveryNotification(PurchaseOrder order) async {
+    if (!order.hasDeliveryDate || order.isDelivered || order.isCancelled) {
+      return null;
+    }
+
+    final deliveryDate = DateTime.parse(order.deliveryDate!);
+    final notificationDate = deliveryDate.subtract(const Duration(days: 1));
+    final now = DateTime.now();
+
+    // Only schedule if notification date is in the future
+    if (notificationDate.isBefore(now)) {
+      return null;
+    }
+
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'delivery_channel',
+      'Delivery Reminders',
+      channelDescription: 'Notifications for purchase order deliveries',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    final notificationId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    await _notificationsPlugin.zonedSchedule(
+      notificationId,
+      'Delivery Reminder',
+      'Ang order mo ay dadating bukas! Product ID: ${order.productId}',
+      tz.TZDateTime.from(notificationDate, tz.local),
+      platformChannelSpecifics,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+
+    return notificationId;
+  }
+
+  // Check for upcoming deliveries and schedule notifications
+  Future<void> checkUpcomingDeliveries() async {
+    final upcomingDeliveries = await _purchaseOrderRepository.getUpcomingDeliveries();
+
+    for (final order in upcomingDeliveries) {
+      if (order.notificationId == null) {
+        final notificationId = await scheduleDeliveryNotification(order);
+        if (notificationId != null) {
+          // Update the order with the notification ID
+          await _purchaseOrderRepository.updatePurchaseOrder(
+            order.copyWith(notificationId: notificationId),
+          );
+        }
+      }
+    }
+  }
+
+  // Cancel notification for a specific purchase order
+  Future<void> cancelDeliveryNotification(int? notificationId) async {
+    if (notificationId != null) {
+      await _notificationsPlugin.cancel(notificationId);
+    }
   }
 
   Future<void> cancelAllNotifications() async {

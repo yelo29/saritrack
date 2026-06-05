@@ -10,6 +10,7 @@ import 'expense_screen.dart';
 import 'customer_screen.dart';
 import 'backup_restore_screen.dart';
 import 'expiring_products_screen.dart';
+import 'purchase_order_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -88,6 +89,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     'Expenses',
     'Customers',
     'Expiring Products',
+    'Purchase Orders',
     'Backup/Restore',
   ];
 
@@ -99,6 +101,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     const ExpenseScreen(),
     const CustomerScreen(),
     const ExpiringProductsScreen(),
+    const PurchaseOrderListScreen(),
     const BackupRestoreScreen(),
   ];
 

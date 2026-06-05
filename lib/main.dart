@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'providers/product_provider.dart';
 import 'providers/sale_provider.dart';
 import 'providers/supplier_provider.dart';
@@ -7,6 +8,7 @@ import 'providers/refund_provider.dart';
 import 'providers/expense_provider.dart';
 import 'providers/customer_provider.dart';
 import 'providers/utang_transaction_provider.dart';
+import 'providers/purchase_order_provider.dart';
 import 'screens/home_screen.dart';
 import 'services/seed_data_service.dart';
 import 'services/notification_service.dart';
@@ -15,6 +17,7 @@ import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
   await DatabaseHelper.instance.database;
   await NotificationService.instance.initialize();
   await SeedDataService.seedSampleData();
@@ -36,6 +39,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ExpenseProvider()),
         ChangeNotifierProvider(create: (_) => CustomerProvider()),
         ChangeNotifierProvider(create: (_) => UtangTransactionProvider()),
+        ChangeNotifierProvider(create: (_) => PurchaseOrderProvider()),
       ],
       child: MaterialApp(
         title: 'SariTrack',

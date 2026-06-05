@@ -18,6 +18,7 @@ An offline-first inventory and sales tracker mobile application designed for Fil
 - **Barcode Scanning**: Scan product barcodes using camera for quick product lookup and automatic cart addition
 - **CSV/PDF Export**: Export sales history, expenses, profit data, and inventory to CSV or PDF format for accounting and record-keeping
 - **Discount System**: Set percentage or fixed amount discounts on products for promotions and sales
+- **Purchase Orders**: Track restocking orders with delivery date tracking, status management (pending/delivered/cancelled), and delivery notifications
 - **Low-Stock Alerts**: Automatic notifications when products fall below their reorder level (both on app start and after each sale)
 - **Profit Summary Chart**: Visual profit analysis with daily (last 7 days) and weekly (last 4 weeks) views using fl_chart (profit = sales - expenses)
 - **Supplier Management**: Track suppliers with contact information and last restock dates
@@ -336,6 +337,26 @@ flutter test
 6. The discounted price will be displayed in red with the original price struck through in the **Sell** tab
 7. During checkout, the discounted price will be automatically applied
 8. To remove a discount, edit the product and select "Walang Discount"
+
+### Using Purchase Orders
+1. Navigate to **Reports → Purchase Orders**
+2. Tap the **+** button to create a new purchase order
+3. Select the product you want to order
+4. Optionally select a supplier
+5. Enter the quantity and buy price per unit
+6. Select a delivery date (optional) - this will schedule a notification 1 day before delivery
+7. Add any notes if needed
+8. Save the purchase order
+9. The order will appear in the list with status indicators:
+   - **Orange**: Pending
+   - **Green**: Delivered
+   - **Red**: Cancelled
+10. You can filter orders by status using the filter chips
+11. Tap the edit icon to change the order status
+12. Tap the delete icon to remove an order
+13. Orders with delivery dates approaching (within 2 days) will show "ARRIVING SOON"
+14. Overdue orders will show "OVERDUE" in red
+15. You'll receive a notification 1 day before the delivery date
 
 ## Project Structure
 

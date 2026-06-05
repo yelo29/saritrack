@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 12,
+      version: 13,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -109,6 +109,27 @@ class DatabaseHelper {
     await db.execute('CREATE INDEX idx_sales_created_at ON sales(created_at)');
     await db.execute('CREATE INDEX idx_products_supplier_id ON products(supplier_id)');
     await db.execute('CREATE INDEX idx_refunds_sale_id ON refunds(sale_id)');
+
+    // Create purchase_orders table
+    await db.execute('''
+      CREATE TABLE purchase_orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        supplier_id INTEGER,
+        product_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        buy_price REAL NOT NULL,
+        total_cost REAL NOT NULL,
+        delivery_date TEXT,
+        status TEXT DEFAULT 'pending',
+        notes TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        notification_id INTEGER,
+        FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_purchase_orders_delivery_date ON purchase_orders(delivery_date)');
+    await db.execute('CREATE INDEX idx_purchase_orders_status ON purchase_orders(status)');
 
     // Create expenses table
     await db.execute('''
@@ -244,6 +265,28 @@ class DatabaseHelper {
       await db.execute('ALTER TABLE sales ADD COLUMN discount_type TEXT');
       await db.execute('ALTER TABLE sales ADD COLUMN discount_value REAL DEFAULT 0');
       await db.execute('ALTER TABLE sales ADD COLUMN original_price REAL DEFAULT total');
+    }
+    if (oldVersion < 13) {
+      // Create purchase_orders table
+      await db.execute('''
+        CREATE TABLE purchase_orders (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          supplier_id INTEGER,
+          product_id INTEGER NOT NULL,
+          quantity INTEGER NOT NULL,
+          buy_price REAL NOT NULL,
+          total_cost REAL NOT NULL,
+          delivery_date TEXT,
+          status TEXT DEFAULT 'pending',
+          notes TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          notification_id INTEGER,
+          FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL,
+          FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        )
+      ''');
+      await db.execute('CREATE INDEX idx_purchase_orders_delivery_date ON purchase_orders(delivery_date)');
+      await db.execute('CREATE INDEX idx_purchase_orders_status ON purchase_orders(status)');
     }
   }
 
