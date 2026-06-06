@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 13,
+      version: 14,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -130,6 +130,21 @@ class DatabaseHelper {
     ''');
     await db.execute('CREATE INDEX idx_purchase_orders_delivery_date ON purchase_orders(delivery_date)');
     await db.execute('CREATE INDEX idx_purchase_orders_status ON purchase_orders(status)');
+
+    // Create product_variants table
+    await db.execute('''
+      CREATE TABLE product_variants (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 0,
+        sell_price REAL NOT NULL,
+        buy_price REAL NOT NULL,
+        barcode TEXT,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_product_variants_product_id ON product_variants(product_id)');
 
     // Create expenses table
     await db.execute('''
@@ -287,6 +302,22 @@ class DatabaseHelper {
       ''');
       await db.execute('CREATE INDEX idx_purchase_orders_delivery_date ON purchase_orders(delivery_date)');
       await db.execute('CREATE INDEX idx_purchase_orders_status ON purchase_orders(status)');
+    }
+    if (oldVersion < 14) {
+      // Create product_variants table
+      await db.execute('''
+        CREATE TABLE product_variants (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          product_id INTEGER NOT NULL,
+          name TEXT NOT NULL,
+          quantity INTEGER NOT NULL DEFAULT 0,
+          sell_price REAL NOT NULL,
+          buy_price REAL NOT NULL,
+          barcode TEXT,
+          FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        )
+      ''');
+      await db.execute('CREATE INDEX idx_product_variants_product_id ON product_variants(product_id)');
     }
   }
 
