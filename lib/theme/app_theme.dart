@@ -276,3 +276,40 @@ class AppTheme {
         listTileTheme: _listTileTheme,
       );
 }
+
+// Add this extension to app_theme.dart or create a separate file
+extension AppThemeExtension on ThemeData {
+  BoxDecoration get shelfBackground {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          AppTheme.surfaceWhite,
+          AppTheme.surfaceCream,
+        ],
+      ),
+    );
+  }
+  
+  BoxDecoration get woodenShelfDecoration {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(12),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppTheme.secondaryBrownLight.withOpacity(0.3),
+          AppTheme.secondaryBrown.withOpacity(0.1),
+        ],
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: AppTheme.secondaryBrownDark.withOpacity(0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    );
+  }
+}
