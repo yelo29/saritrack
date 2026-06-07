@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/backup_service.dart';
+import '../widgets/animated_button.dart';
 
 class BackupRestoreScreen extends StatefulWidget {
   const BackupRestoreScreen({super.key});
@@ -481,59 +482,6 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> with SingleTi
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class AnimatedButton extends StatefulWidget {
-  final VoidCallback? onPressed;
-  final bool isLoading;
-  final IconData icon;
-  final String label;
-  final Color color;
-
-  const AnimatedButton({
-    super.key,
-    this.onPressed,
-    required this.isLoading,
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-
-  @override
-  State<AnimatedButton> createState() => _AnimatedButtonState();
-}
-
-class _AnimatedButtonState extends State<AnimatedButton> with SingleTickerProviderStateMixin {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        transform: Matrix4.identity()..scale(_isHovered && widget.onPressed != null ? 1.02 : 1.0),
-        child: ElevatedButton.icon(
-          onPressed: widget.onPressed,
-          icon: widget.isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                )
-              : Icon(widget.icon),
-          label: Text(widget.isLoading ? 'Naglo-load...' : widget.label),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: widget.color,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
       ),
     );
   }

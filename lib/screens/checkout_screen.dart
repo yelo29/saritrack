@@ -293,6 +293,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with SingleTickerProvid
           const SizedBox(height: 16),
           AnimatedButton(
             onPressed: (_isUtang && _selectedCustomer == null) || (!_isUtang && _change < 0) ? null : _completeSale,
+            icon: _isUtang ? Icons.account_balance_wallet : Icons.check_circle,
             label: _isUtang ? 'I-record ang Utang' : 'I-complete ang Benta',
             color: _isUtang ? const Color(0xFFC4793A) : const Color(0xFF1A6B8A),
           ),
@@ -466,47 +467,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> with SingleTickerProvid
           TextButton(onPressed: onConfirm, child: Text(confirmText, style: TextStyle(color: confirmColor))),
         ],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-    );
-  }
-}
-
-// Reusable animated button widget (same as in backup_restore_screen)
-class AnimatedButton extends StatefulWidget {
-  final VoidCallback? onPressed;
-  final String label;
-  final Color color;
-
-  const AnimatedButton({super.key, this.onPressed, required this.label, required this.color});
-
-  @override
-  State<AnimatedButton> createState() => _AnimatedButtonState();
-}
-
-class _AnimatedButtonState extends State<AnimatedButton> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        transform: Matrix4.identity()..scale(_isHovered && widget.onPressed != null ? 1.02 : 1.0),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: widget.onPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: widget.color,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: Text(widget.label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          ),
-        ),
       ),
     );
   }

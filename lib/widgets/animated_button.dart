@@ -7,6 +7,7 @@ class AnimatedButton extends StatefulWidget {
   final Color color;
   final Color? textColor;
   final bool isSmall;
+  final bool isLoading;
 
   const AnimatedButton({
     super.key,
@@ -16,6 +17,7 @@ class AnimatedButton extends StatefulWidget {
     required this.color,
     this.textColor,
     this.isSmall = false,
+    this.isLoading = false,
   });
 
   @override
@@ -35,9 +37,15 @@ class _AnimatedButtonState extends State<AnimatedButton> {
         transform: Matrix4.identity()..scale(_isHovered && widget.onPressed != null ? 1.05 : 1.0),
         child: ElevatedButton.icon(
           onPressed: widget.onPressed,
-          icon: Icon(widget.icon, size: widget.isSmall ? 16 : 20, color: widget.textColor ?? Colors.white),
+          icon: widget.isLoading
+              ? SizedBox(
+                  width: widget.isSmall ? 12 : 20,
+                  height: widget.isSmall ? 12 : 20,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: widget.textColor ?? Colors.white),
+                )
+              : Icon(widget.icon, size: widget.isSmall ? 16 : 20, color: widget.textColor ?? Colors.white),
           label: Text(
-            widget.label,
+            widget.isLoading ? 'Naglo-load...' : widget.label,
             style: TextStyle(fontSize: widget.isSmall ? 12 : 14, color: widget.textColor ?? Colors.white),
           ),
           style: ElevatedButton.styleFrom(
