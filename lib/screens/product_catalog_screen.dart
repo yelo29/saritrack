@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
+import '../providers/supplier_provider.dart';
 import '../models/product.dart';
 import 'product_form_screen.dart';
 import '../services/export_service.dart';
@@ -145,8 +146,8 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> with Single
             ],
           ),
         ),
-        child: Consumer<ProductProvider>(
-          builder: (context, productProvider, child) {
+        child: Consumer2<ProductProvider, SupplierProvider>(
+          builder: (context, productProvider, supplierProvider, child) {
             if (productProvider.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -187,7 +188,7 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> with Single
                                   offset: Offset((1 - value) * 50, 0),
                                   child: Opacity(opacity: value, child: child),
                                 ),
-                                child: _buildProductCard(product, productProvider, index),
+                                child: _buildProductCard(product, productProvider, supplierProvider, index),
                               );
                             },
                           ),
@@ -279,9 +280,10 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> with Single
     );
   }
 
-  Widget _buildProductCard(Product product, ProductProvider provider, int index) {
+  Widget _buildProductCard(Product product, ProductProvider provider, SupplierProvider supplierProvider, int index) {
     final isExpanded = _expandedIndex == index;
     final isLowStock = product.quantity <= product.reorderLevel;
+    final supplier = product.supplierId != null ? supplierProvider.getSupplierById(product.supplierId!) : null;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hoveredIndex = index),
@@ -360,7 +362,7 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> with Single
                     _buildDetailRow(Icons.reorder, 'Reorder Level:', product.reorderLevel.toString()),
                     const SizedBox(height: 8),
                     if (product.supplierId != null)
-                      _buildDetailRow(Icons.local_shipping, 'Supplier ID:', product.supplierId.toString()),
+                      _buildDetailRow(Icons.local_shipping, 'Supplier:', supplier?.name ?? 'Unknown'),
                     const SizedBox(height: 8),
                     if (product.expirationDate != null)
                       _buildDetailRow(Icons.calendar_today, 'Expiration:', product.expirationDate!),
