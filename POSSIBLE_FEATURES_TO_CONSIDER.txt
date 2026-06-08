@@ -249,7 +249,7 @@ CSV/PDF Export ✅ COMPLETED - Accounting
 Tier 3: Nice-to-Have
 Discount System ✅ COMPLETED - Marketing
 Purchase Orders ✅ COMPLETED - Restocking workflow
-Product Variants - For specific product types
+Product Variants - For specific product types - CANT IMPLEMENT YET
 Tier 4: Low Priority
 Employee Management - Only for multi-staff
 Tax Management - Not needed for informal stores
