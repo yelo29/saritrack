@@ -365,7 +365,7 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> with Single
                       _buildDetailRow(Icons.local_shipping, 'Supplier:', supplier?.name ?? 'Unknown'),
                     const SizedBox(height: 8),
                     if (product.expirationDate != null)
-                      _buildDetailRow(Icons.calendar_today, 'Expiration:', product.expirationDate!),
+                      _buildDetailRow(Icons.calendar_today, 'Expiration:', product.expirationDate!.split('T')[0]),
                     const SizedBox(height: 8),
                     if (product.barcode != null)
                       _buildDetailRow(Icons.qr_code, 'Barcode:', product.barcode!),

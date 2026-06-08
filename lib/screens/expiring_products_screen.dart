@@ -201,7 +201,7 @@ class _ExpiringProductsScreenState extends State<ExpiringProductsScreen> with Si
                 if (isExpanded) ...[
                   const Divider(),
                   const SizedBox(height: 12),
-                  _buildInfoRow(Icons.calendar_today, 'Expiration:', product.expirationDate ?? 'N/A', isExpired ? Colors.red : Colors.orange),
+                  _buildInfoRow(Icons.calendar_today, 'Expiration:', product.expirationDate?.split('T')[0] ?? 'N/A', isExpired ? Colors.red : Colors.orange),
                   const SizedBox(height: 8),
                   _buildInfoRow(Icons.inventory, 'Stock:', product.quantity.toString(), Colors.grey[700]),
                   const SizedBox(height: 8),

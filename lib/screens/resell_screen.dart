@@ -376,6 +376,20 @@ class _ResellScreenState extends State<ResellScreen> with SingleTickerProviderSt
                               const SizedBox(height: 4),
                               Text('₱${product.sellPrice.toStringAsFixed(2)}', style: TextStyle(fontSize: 14, color: const Color(0xFFC4793A), fontWeight: FontWeight.bold)),
                               Text('Ref: ${product.refundedStock}', style: TextStyle(fontSize: 12, color: Colors.orange[700], fontWeight: FontWeight.bold)),
+                              if (product.isExpired)
+                                Container(
+                                  margin: const EdgeInsets.only(top: 4),
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10)),
+                                  child: const Text('EXPIRED', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                                ),
+                              if (product.isExpiringSoon && !product.isExpired)
+                                Container(
+                                  margin: const EdgeInsets.only(top: 4),
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(10)),
+                                  child: const Text('EXPIRING SOON', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                                ),
                               if (inCart > 0)
                                 Container(
                                   margin: const EdgeInsets.only(top: 4),

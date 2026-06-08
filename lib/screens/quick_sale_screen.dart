@@ -373,6 +373,13 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> with SingleTickerProv
                               decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10)),
                               child: const Text('EXPIRED', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
                             ),
+                          if (product.isExpiringSoon && !product.isExpired)
+                            Container(
+                              margin: const EdgeInsets.only(top: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(10)),
+                              child: const Text('EXPIRING SOON', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                            ),
                         ],
                       ),
                     ),
