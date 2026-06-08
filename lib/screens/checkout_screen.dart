@@ -58,9 +58,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> with SingleTickerProvid
     return total;
   }
 
+  double get _totalVat {
+    final productProvider = context.read<ProductProvider>();
+    double totalVat = 0;
+    widget.cart.forEach((productId, quantity) {
+      final product = productProvider.getProductById(productId);
+      if (product != null) {
+        totalVat += product.vatAmount * quantity;
+      }
+    });
+    return totalVat;
+  }
+
+  double get _totalWithVat {
+    return _total + _totalVat;
+  }
+
   double get _change {
     final cash = double.tryParse(_cashController.text) ?? 0;
-    return cash - _total;
+    return cash - _totalWithVat;
   }
 
   Future<void> _completeSale() async {
@@ -95,6 +111,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> with SingleTickerProvid
           product.sellPrice,
           amountPaid: _isUtang ? 0 : cashPaid,
           changeGiven: _isUtang ? 0 : changeGiven,
+          vatAmount: product.vatAmount * entry.value,
         );
         if (!success) allSuccess = false;
       }
@@ -277,9 +294,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> with SingleTickerProvid
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              const Text('Subtotal:', style: TextStyle(fontSize: 14)),
+              Text('₱${_total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14)),
+            ],
+          ),
+          if (_totalVat > 0) ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('VAT:', style: TextStyle(fontSize: 14)),
+                Text('₱${_totalVat.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14)),
+              ],
+            ),
+          ],
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               const Text('Kabuuan:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               TweenAnimationBuilder<double>(
-                tween: Tween(begin: _total, end: _total),
+                tween: Tween(begin: _totalWithVat, end: _totalWithVat),
                 duration: const Duration(milliseconds: 300),
                 builder: (context, value, child) => Text('₱${value.toStringAsFixed(2)}',
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFC4793A))),

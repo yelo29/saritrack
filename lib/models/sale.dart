@@ -10,6 +10,7 @@ class Sale {
   final String? discountType;
   final double discountValue;
   final double originalPrice;
+  final double vatAmount;
 
   Sale({
     this.id,
@@ -23,6 +24,7 @@ class Sale {
     this.discountType,
     this.discountValue = 0,
     required this.originalPrice,
+    this.vatAmount = 0,
   });
 
   // Convert to map for database
@@ -39,6 +41,7 @@ class Sale {
       'discount_type': discountType,
       'discount_value': discountValue,
       'original_price': originalPrice,
+      'vat_amount': vatAmount,
     };
   }
 
@@ -56,6 +59,7 @@ class Sale {
       discountType: map['discount_type'] as String?,
       discountValue: (map['discount_value'] as num?)?.toDouble() ?? 0,
       originalPrice: (map['original_price'] as num?)?.toDouble() ?? map['total'] as double,
+      vatAmount: (map['vat_amount'] as num?)?.toDouble() ?? 0,
     );
   }
 
@@ -72,6 +76,7 @@ class Sale {
     String? discountType,
     double? discountValue,
     double? originalPrice,
+    double? vatAmount,
   }) {
     return Sale(
       id: id ?? this.id,
@@ -85,6 +90,7 @@ class Sale {
       discountType: discountType ?? this.discountType,
       discountValue: discountValue ?? this.discountValue,
       originalPrice: originalPrice ?? this.originalPrice,
+      vatAmount: vatAmount ?? this.vatAmount,
     );
   }
 

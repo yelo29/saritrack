@@ -357,6 +357,8 @@ class _ProfitChartScreenState extends State<ProfitChartScreen> with SingleTicker
             const SizedBox(height: 16),
             _buildSummaryRow('Total Profit', _getTotalProfit()),
             const Divider(),
+            _buildSummaryRow('Total VAT Collected', _getTotalVAT()),
+            const Divider(),
             _buildSummaryRow('Average Daily Profit', _getAverageProfit()),
             const Divider(),
             _buildSummaryRow('Best Day', _getBestDay(), isText: true),
@@ -390,6 +392,10 @@ class _ProfitChartScreenState extends State<ProfitChartScreen> with SingleTicker
 
   double _getMaxProfit() => _profitData.isEmpty ? 100 : _profitData.values.reduce((a, b) => a > b ? a : b);
   double _getTotalProfit() => _profitData.values.fold(0, (sum, v) => sum + v);
+  double _getTotalVAT() {
+    final saleProvider = context.read<SaleProvider>();
+    return saleProvider.sales.fold(0, (sum, sale) => sum + sale.vatAmount);
+  }
   double _getAverageProfit() => _profitData.isEmpty ? 0 : _getTotalProfit() / _profitData.length;
   String _getBestDay() {
     if (_profitData.isEmpty) return 'N/A';

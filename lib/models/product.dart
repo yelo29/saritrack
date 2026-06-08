@@ -12,6 +12,7 @@ class Product {
   final String? barcode;
   final String? discountType; // 'percentage' or 'fixed'
   final double discountValue;
+  final double vatRate; // VAT rate as percentage (e.g., 12 for 12%)
 
   Product({
     this.id,
@@ -27,6 +28,7 @@ class Product {
     this.barcode,
     this.discountType,
     this.discountValue = 0,
+    this.vatRate = 0,
   });
 
   // Convert to map for database
@@ -45,6 +47,7 @@ class Product {
       'barcode': barcode,
       'discount_type': discountType,
       'discount_value': discountValue,
+      'vat_rate': vatRate,
     };
   }
 
@@ -64,6 +67,7 @@ class Product {
       barcode: map['barcode'] as String?,
       discountType: map['discount_type'] as String?,
       discountValue: (map['discount_value'] as num?)?.toDouble() ?? 0,
+      vatRate: (map['vat_rate'] as num?)?.toDouble() ?? 0,
     );
   }
 
@@ -82,6 +86,7 @@ class Product {
     String? barcode,
     String? discountType,
     double? discountValue,
+    double? vatRate,
   }) {
     return Product(
       id: id ?? this.id,
@@ -97,6 +102,7 @@ class Product {
       barcode: barcode ?? this.barcode,
       discountType: discountType ?? this.discountType,
       discountValue: discountValue ?? this.discountValue,
+      vatRate: vatRate ?? this.vatRate,
     );
   }
 
@@ -141,5 +147,27 @@ class Product {
   // Get the discount amount
   double get discountAmount {
     return sellPrice - discountedPrice;
+  }
+
+  // Check if product has VAT
+  bool get hasVat {
+    return vatRate > 0;
+  }
+
+  // Get the VAT amount for the discounted price
+  double get vatAmount {
+    if (!hasVat) return 0;
+    return discountedPrice * (vatRate / 100);
+  }
+
+  // Get the price including VAT (VAT-inclusive pricing)
+  double get priceWithVat {
+    return discountedPrice + vatAmount;
+  }
+
+  // Get the price excluding VAT (for VAT-exclusive pricing)
+  double get priceWithoutVat {
+    if (!hasVat) return discountedPrice;
+    return discountedPrice / (1 + (vatRate / 100));
   }
 }

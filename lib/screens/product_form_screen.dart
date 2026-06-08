@@ -31,6 +31,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   DateTime? _expirationDate;
   String? _discountType;
   final _discountValueController = TextEditingController();
+  final _vatRateController = TextEditingController();
+  double _vatRate = 0;
 
   @override
   void initState() {
@@ -51,6 +53,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _barcodeController.text = widget.product!.barcode ?? '';
       _discountType = widget.product!.discountType;
       _discountValueController.text = widget.product!.discountValue.toString();
+      _vatRate = widget.product!.vatRate;
+      _vatRateController.text = _vatRate.toString();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SupplierProvider>().loadSuppliers();
@@ -68,6 +72,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _supplierController.dispose();
     _barcodeController.dispose();
     _discountValueController.dispose();
+    _vatRateController.dispose();
     super.dispose();
   }
 
@@ -116,6 +121,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       barcode: _barcodeController.text.trim().isEmpty ? null : _barcodeController.text.trim(),
       discountType: _discountType,
       discountValue: _discountValueController.text.trim().isEmpty ? 0 : double.parse(_discountValueController.text.trim()),
+      vatRate: _vatRate,
     );
 
     bool success;
@@ -398,6 +404,40 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   keyboardType: TextInputType.number,
                 ),
               if (_discountType != null) const SizedBox(height: 16),
+              const SizedBox(height: 16),
+              const Text(
+                'VAT (Optional)',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<double>(
+                value: _vatRate == 0 ? null : _vatRate,
+                decoration: const InputDecoration(
+                  labelText: 'VAT Rate',
+                  border: OutlineInputBorder(),
+                  helperText: 'Piliin ang VAT rate (12% para sa registered businesses)',
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: null,
+                    child: Text('Walang VAT (0%)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 12.0,
+                    child: Text('12% (Standard VAT)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 0.0,
+                    child: Text('0% (VAT Exempt)'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _vatRate = value ?? 0;
+                    _vatRateController.text = _vatRate.toString();
+                  });
+                },
+              ),
               const SizedBox(height: 16),
               Consumer<SupplierProvider>(
                 builder: (context, supplierProvider, child) {

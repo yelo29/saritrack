@@ -297,6 +297,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> with SingleTick
                     children: [
                       _buildDetailChip(Icons.receipt, '₱${pricePerUnit.toStringAsFixed(2)}/pc'),
                       if (sale.hasDiscount) _buildDetailChip(Icons.local_offer, sale.discountType == 'percentage' ? '${sale.discountValue.toStringAsFixed(0)}% off' : '₱${sale.discountValue.toStringAsFixed(2)} off'),
+                      if (sale.vatAmount > 0) _buildDetailChip(Icons.account_balance, 'VAT: ₱${sale.vatAmount.toStringAsFixed(2)}'),
                       if (sale.amountPaid != null) _buildDetailChip(Icons.payment, 'Paid: ₱${sale.amountPaid!.toStringAsFixed(2)}'),
                       if (sale.changeGiven != null && sale.changeGiven! > 0) _buildDetailChip(Icons.money_off, 'Change: ₱${sale.changeGiven!.toStringAsFixed(2)}'),
                     ],

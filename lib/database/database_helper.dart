@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 13,
+      version: 14,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -47,6 +47,7 @@ class DatabaseHelper {
         barcode TEXT,
         discount_type TEXT,
         discount_value REAL DEFAULT 0,
+        vat_rate REAL DEFAULT 0,
         FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL
       )
     ''');
@@ -65,6 +66,7 @@ class DatabaseHelper {
         discount_type TEXT,
         discount_value REAL DEFAULT 0,
         original_price REAL NOT NULL,
+        vat_amount REAL DEFAULT 0,
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
       )
     ''');
@@ -287,6 +289,12 @@ class DatabaseHelper {
       ''');
       await db.execute('CREATE INDEX idx_purchase_orders_delivery_date ON purchase_orders(delivery_date)');
       await db.execute('CREATE INDEX idx_purchase_orders_status ON purchase_orders(status)');
+    }
+    if (oldVersion < 14) {
+      // Add vat_rate column to products table
+      await db.execute('ALTER TABLE products ADD COLUMN vat_rate REAL DEFAULT 0');
+      // Add vat_amount column to sales table
+      await db.execute('ALTER TABLE sales ADD COLUMN vat_amount REAL DEFAULT 0');
     }
   }
 
