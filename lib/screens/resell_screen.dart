@@ -29,9 +29,23 @@ class _ResellScreenState extends State<ResellScreen> with SingleTickerProviderSt
     double total = 0;
     _cart.forEach((productId, quantity) {
       final product = productProvider.getProductById(productId);
-      if (product != null) total += product.sellPrice * quantity;
+      if (product != null) total += product.discountedPrice * quantity;
     });
     return total;
+  }
+
+  double get _totalVat {
+    final productProvider = context.read<ProductProvider>();
+    double totalVat = 0;
+    _cart.forEach((productId, quantity) {
+      final product = productProvider.getProductById(productId);
+      if (product != null) totalVat += product.vatAmount * quantity;
+    });
+    return totalVat;
+  }
+
+  double get _totalWithVat {
+    return _total + _totalVat;
   }
 
   @override
@@ -282,7 +296,7 @@ class _ResellScreenState extends State<ResellScreen> with SingleTickerProviderSt
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('$_itemCount items', style: const TextStyle(fontSize: 12)),
-                    Text('₱${_total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    Text('₱${_totalWithVat.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                   ],
                 ),
                 backgroundColor: const Color(0xFFC4793A),
@@ -610,12 +624,26 @@ class _ResellCheckoutScreenState extends State<ResellCheckoutScreen> with Single
     double total = 0;
     widget.cart.forEach((productId, quantity) {
       final product = productProvider.getProductById(productId);
-      if (product != null) total += product.sellPrice * quantity;
+      if (product != null) total += product.discountedPrice * quantity;
     });
     return total;
   }
 
-  double get _change => (double.tryParse(_cashController.text) ?? 0) - _total;
+  double get _totalVat {
+    final productProvider = context.read<ProductProvider>();
+    double totalVat = 0;
+    widget.cart.forEach((productId, quantity) {
+      final product = productProvider.getProductById(productId);
+      if (product != null) totalVat += product.vatAmount * quantity;
+    });
+    return totalVat;
+  }
+
+  double get _totalWithVat {
+    return _total + _totalVat;
+  }
+
+  double get _change => (double.tryParse(_cashController.text) ?? 0) - _totalWithVat;
 
   Future<void> _completeResale() async {
     if (widget.cart.isEmpty) {
@@ -693,11 +721,11 @@ class _ResellCheckoutScreenState extends State<ResellCheckoutScreen> with Single
                           child: ListTile(
                             leading: CircleAvatar(backgroundColor: const Color(0xFFC4793A), child: Text('${entry.value}')),
                             title: Text(product.name),
-                            subtitle: Text('₱${product.sellPrice.toStringAsFixed(2)} each'),
+                            subtitle: Text('₱${product.discountedPrice.toStringAsFixed(2)} each'),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text('₱${(product.sellPrice * entry.value).toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                Text('₱${(product.discountedPrice * entry.value).toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                                 IconButton(
                                   icon: const Icon(Icons.remove_circle_outline),
                                   onPressed: () => _showRemoveQuantityDialog(product, entry.key, entry.value),
@@ -731,9 +759,27 @@ class _ResellCheckoutScreenState extends State<ResellCheckoutScreen> with Single
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              const Text('Subtotal:', style: TextStyle(fontSize: 14)),
+              Text('₱${_total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14)),
+            ],
+          ),
+          if (_totalVat > 0) ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('VAT:', style: TextStyle(fontSize: 14)),
+                Text('₱${_totalVat.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14)),
+              ],
+            ),
+          ],
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               const Text('Kabuuan:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: _total),
+                tween: Tween(begin: 0.0, end: _totalWithVat),
                 duration: const Duration(milliseconds: 600),
                 builder: (context, value, child) => Text('₱${value.toStringAsFixed(2)}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFC4793A))),
               ),

@@ -123,12 +123,13 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> with SingleTick
             final filteredSales = _filterSales(saleProvider.sales, productProvider);
             final totalSales = filteredSales.fold(0.0, (sum, s) => sum + s.total);
             final totalItems = filteredSales.fold(0, (sum, s) => sum + s.qtySold);
+            final totalVat = filteredSales.fold(0.0, (sum, s) => sum + s.vatAmount);
 
             return Column(
               children: [
                 FadeTransition(
                   opacity: _animationController,
-                  child: _buildSummaryCard(totalSales, totalItems, filteredSales.length),
+                  child: _buildSummaryCard(totalSales, totalItems, filteredSales.length, totalVat),
                 ),
                 Expanded(
                   child: RefreshIndicator(
@@ -177,7 +178,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> with SingleTick
     );
   }
 
-  Widget _buildSummaryCard(double totalSales, int totalItems, int transactionCount) {
+  Widget _buildSummaryCard(double totalSales, int totalItems, int transactionCount, double totalVat) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -202,6 +203,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> with SingleTick
               _buildStatColumn('₱${totalSales.toStringAsFixed(2)}', 'Total Sales'),
               _buildStatColumn('$totalItems', 'Items Sold'),
               _buildStatColumn('$transactionCount', 'Transactions'),
+              _buildStatColumn('₱${totalVat.toStringAsFixed(2)}', 'Total VAT'),
             ],
           ),
         ],
