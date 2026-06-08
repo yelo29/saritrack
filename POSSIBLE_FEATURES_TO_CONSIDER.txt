@@ -253,3 +253,15 @@ Product Variants - For specific product types - CANT IMPLEMENT
 Tier 4: Low Priority
 Employee Management - Only for multi-staff - CANT IMPLEMENT
 Tax Management - Not needed for informal stores - CANT IMPLEMENT
+
+Other Offline Features to Consider
+High Value Features:
+
+Sales Target/Goals Tracking - Set daily/weekly/monthly sales targets with progress visualizations
+Reorder Point System - Auto-alert when stock reaches minimum level, suggest reorder quantities
+Cash Drawer Management - Track cash in/out during shifts, reconcile at end of day
+Customer Loyalty Points - Reward repeat customers with points redeemable for discounts
+Daily Sales Dashboard - Quick overview of today's sales, top products, low stock alerts
+Price History - Track price changes over time, view historical pricing
+Waste/Shrinkage Tracking - Record damaged/lost inventory, calculate losses
+Supplier Performance - Track delivery times, product quality per supplier
